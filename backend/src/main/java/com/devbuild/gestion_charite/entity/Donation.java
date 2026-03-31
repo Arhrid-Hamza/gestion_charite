@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.devbuild.gestion_charite.entity.enums.DonationStatus;
+import com.devbuild.gestion_charite.entity.enums.PaymentMethod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,6 +47,16 @@ public class Donation {
 
 	@Column(nullable = false)
 	private Long actionId;
+
+	@Column(nullable = false)
+	private Long donorUserId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PaymentMethod paymentMethod;
+
+	@Column(nullable = false, unique = true)
+	private String transactionId;
 
 	@Column(nullable = false)
 	private LocalDateTime createdAt;

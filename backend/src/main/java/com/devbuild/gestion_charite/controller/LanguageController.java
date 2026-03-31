@@ -12,6 +12,6 @@ public class LanguageController {
 
 	@GetMapping
 	public List<String> getLanguages() {
-		return List.of("fr", "en", "ar");
+		return List.of("fr", "ar");
 	}
 }

@@ -8,4 +8,6 @@ import com.devbuild.gestion_charite.entity.Donation;
 
 public interface DonationRepository extends JpaRepository<Donation, Long> {
     List<Donation> findByActionId(Long actionId);
+
+	List<Donation> findByDonorUserIdOrderByCreatedAtDesc(Long donorUserId);
 }

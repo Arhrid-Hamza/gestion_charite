@@ -1,0 +1,44 @@
+.explore-page {
+  background: linear-gradient(135deg, rgba(33, 107, 104, 0.08), rgba(30, 79, 136, 0.08));
+}
+
+.explore-filters {
+  background: white;
+  border: 1px solid rgba(31, 60, 74, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.explore-filters h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #1f3c4a;
+}
+
+.filter-check {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-top: 2rem;
+}
+
+.no-actions {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .explore-filters {
+    padding: 1.5rem;
+  }
+
+  .text-end {
+    text-align: start !important;
+    margin-top: 1rem;
+  }
+}

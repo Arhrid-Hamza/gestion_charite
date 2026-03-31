@@ -39,12 +39,15 @@ public class OrganizationController {
 	}
 
 	@PostMapping
-	public Organization create(@RequestBody Organization organization) {
+	public ResponseEntity<?> create(@RequestBody Organization organization) {
+		if (organizationRepository.existsByTaxIdentificationNumber(organization.getTaxIdentificationNumber())) {
+			return ResponseEntity.badRequest().body("Numero d'identification fiscale deja utilise");
+		}
 		organization.setId(null);
 		if (organization.getStatus() == null) {
 			organization.setStatus(OrganizationStatus.PENDING);
 		}
-		return organizationRepository.save(organization);
+		return ResponseEntity.ok(organizationRepository.save(organization));
 	}
 
 	@PutMapping("/{id}")
@@ -52,9 +55,41 @@ public class OrganizationController {
 		return organizationRepository.findById(id)
 				.map(existing -> {
 					existing.setName(updated.getName());
+					existing.setLegalAddress(updated.getLegalAddress());
+					existing.setTaxIdentificationNumber(updated.getTaxIdentificationNumber());
+					existing.setPrimaryContactName(updated.getPrimaryContactName());
+					existing.setPrimaryContactEmail(updated.getPrimaryContactEmail());
+					existing.setPrimaryContactPhone(updated.getPrimaryContactPhone());
+					existing.setLogoUrl(updated.getLogoUrl());
 					existing.setDescription(updated.getDescription());
-					existing.setStatus(updated.getStatus());
+					existing.setMission(updated.getMission());
+					existing.setAdminUserId(updated.getAdminUserId());
+					if (updated.getStatus() != null) {
+						existing.setStatus(updated.getStatus());
+					}
 					return ResponseEntity.ok(organizationRepository.save(existing));
+				})
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
+	@GetMapping("/pending")
+	public List<Organization> findPending() {
+		return organizationRepository.findByStatus(OrganizationStatus.PENDING);
+	}
+
+	@PutMapping("/{id}/approve")
+	public ResponseEntity<?> approveOrganization(
+			@PathVariable Long id,
+			@org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean superAdminApproved
+	) {
+		if (!superAdminApproved) {
+			return ResponseEntity.badRequest().body("Validation super-admin requise");
+		}
+
+		return organizationRepository.findById(id)
+				.map(org -> {
+					org.setStatus(OrganizationStatus.ACTIVE);
+					return ResponseEntity.ok(organizationRepository.save(org));
 				})
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}

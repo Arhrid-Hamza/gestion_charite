@@ -29,10 +29,38 @@ public class Organization {
 	@Column(nullable = false, unique = true)
 	private String name;
 
+	@Column(nullable = false)
+	private String legalAddress;
+
+	@Column(nullable = false, unique = true)
+	private String taxIdentificationNumber;
+
+	@Column(nullable = false)
+	private String primaryContactName;
+
+	@Column(nullable = false)
+	private String primaryContactEmail;
+
+	private String primaryContactPhone;
+
+	private String logoUrl;
+
 	@Column(length = 1000)
 	private String description;
+
+	@Column(length = 1500)
+	private String mission;
+
+	@Column
+	private Long adminUserId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private OrganizationStatus status;
+
+    public void setEmail(String mail) {
+    }
+
+	public void setAddress(String casablanca) {
+	}
 }

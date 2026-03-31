@@ -46,6 +46,9 @@ public class CharityAction {
 	private ActionStatus status;
 
 	@Column(nullable = false)
+	private Long organizationId;
+
+	@Column(nullable = false)
 	private String organizationName;
 
 	@Column(nullable = false)
@@ -54,4 +57,18 @@ public class CharityAction {
 	private LocalDate startDate;
 
 	private LocalDate endDate;
+
+	private String location;
+
+	@Column(length = 2000)
+	private String mediaUrls;
+
+    public void setGoalAmount(BigDecimal bigDecimal) {
+    }
+
+	public void setOrganization(Organization organization) {
+	}
+
+	public void setCategory(String education) {
+	}
 }

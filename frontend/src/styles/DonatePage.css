@@ -1,0 +1,32 @@
+.donate-page {
+  background: linear-gradient(135deg, rgba(33, 107, 104, 0.08), rgba(76, 175, 80, 0.08));
+}
+
+.donate-card {
+  background: white;
+  border: 1px solid rgba(31, 60, 74, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.donate-title {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #1f3c4a;
+  text-align: center;
+}
+
+.donate-card .form-group {
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 576px) {
+  .donate-card {
+    padding: 1.5rem;
+  }
+
+  .donate-title {
+    font-size: 1.3rem;
+  }
+}

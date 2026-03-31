@@ -1,0 +1,123 @@
+.profile-page {
+  background: linear-gradient(135deg, rgba(33, 107, 104, 0.08), rgba(30, 79, 136, 0.08));
+}
+
+.profile-card,
+.stats-card {
+  background: white;
+  border: 1px solid rgba(31, 60, 74, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.profile-title {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #1f3c4a;
+}
+
+.profile-card .form-group {
+  margin-bottom: 1rem;
+}
+
+.stats-card h3 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #1f3c4a;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #1f3c4a;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: #1e4f88;
+  font-size: 1.1rem;
+}
+
+.donations-history {
+  background: white;
+  border: 1px solid rgba(31, 60, 74, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+}
+
+.donations-history h3 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #1f3c4a;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 0.5rem;
+}
+
+.no-donations {
+  text-align: center;
+  color: #999;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.donation-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.donation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 10px;
+  border-left: 4px solid #4caf50;
+}
+
+.donation-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.donation-id {
+  font-weight: 600;
+  color: #1f3c4a;
+}
+
+.donation-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4caf50;
+}
+
+.donation-status {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  .profile-page > .row {
+    flex-direction: column;
+  }
+
+  .profile-card,
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+}
