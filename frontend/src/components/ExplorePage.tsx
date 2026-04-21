@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useApi } from '../hooks/useApi'
 import { I18N } from '../types/i18n'
 import { Alert, Loader } from './Header'
@@ -20,25 +20,29 @@ export function ExplorePage({ locale, userId, onActionSelect }: ExplorePageProps
   const [category, setCategory] = useState('')
   const [popular, setPopular] = useState(false)
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    loadActions()
-  }, [category, loadActions, popular])
-
-  async function loadActions() {
+  const loadActions = useCallback(async () => {
     try {
       const query = new URLSearchParams()
       if (category) query.append('category', category)
       if (popular) query.append('popular', 'true')
 
+      const queryString = query.toString()
       const data = await call<CharityAction[]>(
-        `/charity-actions?${query.toString()}`,
+        queryString ? `/charity-actions?${queryString}` : '/charity-actions',
       )
       setActions(data)
     } catch {
       // Erreur déjà définie
     }
-  }
+  }, [call, category, popular])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadActions()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [loadActions])
 
   async function loadRecommended() {
     if (!userId) {

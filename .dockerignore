@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/node_modules
+**/npm-debug.log
+backend/target
+frontend/node_modules
+frontend/dist
+.DS_Store
+README.md
+TODO.md
+.idea
+.vscode
+*.log

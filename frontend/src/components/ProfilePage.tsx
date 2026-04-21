@@ -15,6 +15,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
 
+  const [profileUser, setProfileUser] = useState<User | undefined>(user)
   const [fullName, setFullName] = useState(user?.fullName || '')
   const [phone, setPhone] = useState(user?.phone || '')
   const [address, setAddress] = useState(user?.address || '')
@@ -23,10 +24,33 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    if (user?.id) {
-      void call<Donation[]>(`/donations/user/${user.id}`).then(setDonations)
+    if (!user?.id) {
+      return
     }
-  }, [user?.id])
+
+    const timeoutId = window.setTimeout(() => {
+      void call<User>(`/users/${user.id}`).then((payload) => {
+        setProfileUser(payload)
+        setFullName(payload.fullName || '')
+        setPhone(payload.phone || '')
+        setAddress(payload.address || '')
+        setInterests(payload.interests || 'education,sante')
+        onUpdate?.(payload)
+      })
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [call, onUpdate, user?.id])
+
+  useEffect(() => {
+    if (user?.id) {
+      const timeoutId = window.setTimeout(() => {
+        void call<Donation[]>(`/donations/user/${user.id}`).then(setDonations)
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
+    }
+  }, [call, user?.id])
 
   async function handleUpdateProfile() {
     if (!user?.id) {
@@ -47,6 +71,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
         }),
       })
 
+      setProfileUser(payload)
       setSuccess('Profil mis à jour avec succès!')
       onUpdate?.(payload)
     } catch {
@@ -84,7 +109,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                   id="email"
                   type="email" 
                   className="form-control" 
-                  value={user?.email || ''} 
+                  value={profileUser?.email || user?.email || ''} 
                   disabled 
                 />
               </div>
@@ -145,7 +170,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
               </div>
               <div className="stat-item">
                 <span className="stat-label">{t.memberSince}:</span>
-                <span className="stat-value">{user?.createdAt}</span>
+                <span className="stat-value">{profileUser?.createdAt || '-'}</span>
               </div>
             </div>
           </div>

@@ -34,6 +34,13 @@ public class UserController {
 		return userRepository.findAll();
 	}
 
+	@GetMapping("/{id}")
+	public ResponseEntity<User> findById(@PathVariable Long id) {
+		return userRepository.findById(id)
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
 	@PostMapping
 	public User create(@RequestBody User user) {
 		user.setId(null);

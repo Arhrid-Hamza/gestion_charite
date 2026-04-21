@@ -22,9 +22,13 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
 
   useEffect(() => {
     if (userId) {
-      void call<Participation[]>(`/participations/user/${userId}`).then(setParticipations)
+      const timeoutId = window.setTimeout(() => {
+        void call<Participation[]>(`/participations/user/${userId}`).then(setParticipations)
+      }, 0)
+
+      return () => window.clearTimeout(timeoutId)
     }
-  }, [userId])
+  }, [call, userId])
 
   async function handleRegister() {
     if (!userId || !actionId) {

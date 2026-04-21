@@ -54,9 +54,8 @@ export function ActionCard({
               <span>${action.targetAmount}</span>
             </div>
             <div className="progress" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-              <div className="progress-bar" style={{ width: `${progress}%` }}>
-                {progress > 10 && <span className="progress-text">{progress}%</span>}
-              </div>
+              <progress className="progress-bar" value={progress} max={100} aria-hidden="true" />
+              {progress > 10 && <span className="progress-text">{progress}%</span>}
             </div>
           </div>
         )}

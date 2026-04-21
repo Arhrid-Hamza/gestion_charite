@@ -22,11 +22,25 @@ interface DashboardState {
   selectedOrg: Organization | null
 }
 
+function loadSavedUser(): User | null {
+  const raw = localStorage.getItem('user')
+  if (!raw) {
+    return null
+  }
+
+  try {
+    return JSON.parse(raw) as User
+  } catch {
+    localStorage.removeItem('user')
+    return null
+  }
+}
+
 export function App() {
   const [state, setState] = useState<DashboardState>({
-    user: null,
+    user: loadSavedUser(),
     locale: (localStorage.getItem('locale') as Locale) || 'fr',
-    currentPage: 'auth',
+    currentPage: loadSavedUser() ? 'dashboard' : 'auth',
     selectedAction: null,
     selectedOrg: null,
   })
@@ -34,6 +48,15 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('locale', state.locale)
   }, [state.locale])
+
+  useEffect(() => {
+    if (state.user) {
+      localStorage.setItem('user', JSON.stringify(state.user))
+      return
+    }
+
+    localStorage.removeItem('user')
+  }, [state.user])
 
   const t = I18N[state.locale]
 

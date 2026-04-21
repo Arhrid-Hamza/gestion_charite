@@ -3,7 +3,7 @@ import { I18N } from '../types/i18n'
 import { Alert, Loader } from './Header'
 import type { Locale, Organization } from '../types'
 import '../styles/AdminPage.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface AdminPageProps {
   locale: Locale
@@ -16,19 +16,22 @@ export function AdminPage({ locale }: AdminPageProps) {
   const [orgs, setOrgs] = useState<Organization[]>([])
   const [success, setSuccess] = useState('')
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    loadPendingOrgs()
-  }, [])
-
-  async function loadPendingOrgs() {
+  const loadPendingOrgs = useCallback(async () => {
     try {
       const data = await call<Organization[]>('/organizations/pending')
       setOrgs(data)
     } catch {
       // Erreur déjà définie
     }
-  }
+  }, [call])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadPendingOrgs()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [loadPendingOrgs])
 
   async function approveOrg(orgId: number) {
     setSuccess('')

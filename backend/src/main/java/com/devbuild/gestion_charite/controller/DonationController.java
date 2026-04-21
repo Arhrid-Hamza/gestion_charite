@@ -1,9 +1,7 @@
 package com.devbuild.gestion_charite.controller;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,7 +18,7 @@ import com.devbuild.gestion_charite.entity.enums.DonationStatus;
 import com.devbuild.gestion_charite.entity.enums.PaymentMethod;
 import com.devbuild.gestion_charite.repository.CharityActionRepository;
 import com.devbuild.gestion_charite.repository.DonationRepository;
-import com.devbuild.gestion_charite.repository.UserRepository;
+import com.devbuild.gestion_charite.service.DonationProcessingService;
 
 @RestController
 @RequestMapping("/api/donations")
@@ -28,16 +26,16 @@ public class DonationController {
 
 	private final DonationRepository donationRepository;
 	private final CharityActionRepository charityActionRepository;
-    private final UserRepository userRepository;
+	private final DonationProcessingService donationProcessingService;
 
 	public DonationController(
 			DonationRepository donationRepository,
 			CharityActionRepository charityActionRepository,
-			UserRepository userRepository
+			DonationProcessingService donationProcessingService
 	) {
 		this.donationRepository = donationRepository;
 		this.charityActionRepository = charityActionRepository;
-		this.userRepository = userRepository;
+		this.donationProcessingService = donationProcessingService;
 	}
 
 	@GetMapping
@@ -66,38 +64,28 @@ public class DonationController {
 			return ResponseEntity.badRequest().build();
 		}
 
-		CharityAction action = charityActionRepository.findById(donation.getActionId()).orElse(null);
-		if (action == null) {
+		PaymentMethod method = donation.getPaymentMethod() == null ? PaymentMethod.PAYPAL : donation.getPaymentMethod();
+		String incomingStatus = donation.getStatus() == null ? null : donation.getStatus().name();
+		if (incomingStatus != null && !incomingStatus.isBlank()) {
+			if (!incomingStatus.equalsIgnoreCase(DonationStatus.CONFIRMED.name())
+					&& !incomingStatus.equalsIgnoreCase(DonationStatus.PENDING.name())) {
+				return ResponseEntity.badRequest().build();
+			}
+		}
+
+		try {
+			Donation savedDonation = donationProcessingService.createConfirmedDonation(
+					donation.getActionId(),
+					donation.getDonorUserId(),
+					donation.getAmount(),
+					donation.getMessage(),
+					method,
+					donation.getTransactionId()
+			);
+			return ResponseEntity.ok(savedDonation);
+		} catch (IllegalArgumentException ex) {
 			return ResponseEntity.badRequest().build();
 		}
-		com.devbuild.gestion_charite.entity.User donor = userRepository.findById(donation.getDonorUserId()).orElse(null);
-		if (donor == null) {
-			return ResponseEntity.badRequest().build();
-		}
-		if (donation.getDonorName() == null || donation.getDonorName().isBlank()) {
-			donation.setDonorName(donor.getFullName());
-		}
-		if (donation.getDonorEmail() == null || donation.getDonorEmail().isBlank()) {
-			donation.setDonorEmail(donor.getEmail());
-		}
-		if (donation.getPaymentMethod() == null) {
-			donation.setPaymentMethod(PaymentMethod.STRIPE);
-		}
-
-		donation.setId(null);
-		donation.setCreatedAt(LocalDateTime.now());
-		donation.setTransactionId(generateTransactionId(donation.getPaymentMethod()));
-		if (donation.getStatus() == null) {
-			donation.setStatus(DonationStatus.CONFIRMED);
-		}
-
-		Donation savedDonation = donationRepository.save(donation);
-
-		BigDecimal current = action.getCollectedAmount() == null ? BigDecimal.ZERO : action.getCollectedAmount();
-		action.setCollectedAmount(current.add(savedDonation.getAmount()));
-		charityActionRepository.save(action);
-
-		return ResponseEntity.ok(savedDonation);
 	}
 
 	@GetMapping("/user/{userId}")
@@ -114,9 +102,4 @@ public class DonationController {
 		return ResponseEntity.noContent().build();
 	}
 
-	private String generateTransactionId(PaymentMethod paymentMethod) {
-		String method = paymentMethod == null ? "PAY" : paymentMethod.name();
-		String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
-		return method + "-" + suffix;
-	}
 }
