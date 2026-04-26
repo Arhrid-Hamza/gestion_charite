@@ -1,0 +1,250 @@
+.org-auth-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.org-auth-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.org-auth-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.org-auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.org-auth-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.5px;
+}
+
+.org-auth-subtitle {
+  font-size: 0.95rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Auth Type Switcher */
+.auth-type-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 12px;
+}
+
+.switch-btn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 2px solid transparent;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #666;
+}
+
+.switch-btn:hover:not(.active) {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.switch-btn.active {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+}
+
+.switch-divider {
+  color: #ddd;
+  font-size: 1.2rem;
+}
+
+/* Tab Navigation */
+.auth-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 1rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.auth-tab:hover {
+  color: #667eea;
+}
+
+.auth-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+/* Form */
+.org-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s;
+  color: #333;
+}
+
+.form-input::placeholder {
+  color: #bbb;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  background: #f9fbff;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Registration Note */
+.registration-note {
+  font-size: 0.85rem;
+  color: #999;
+  text-align: center;
+  margin: 1rem 0 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Footer */
+.org-auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.org-auth-footer p {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .org-auth-card {
+    padding: 1.5rem;
+  }
+
+  .org-auth-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-type-switcher {
+    flex-wrap: wrap;
+  }
+
+  .switch-btn {
+    flex: 1 1 45%;
+  }
+
+  .switch-divider {
+    flex-basis: 100%;
+    text-align: center;
+  }
+}

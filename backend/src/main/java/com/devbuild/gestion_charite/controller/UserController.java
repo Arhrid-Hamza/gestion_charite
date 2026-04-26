@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devbuild.gestion_charite.entity.Donation;
+import com.devbuild.gestion_charite.entity.Organization;
 import com.devbuild.gestion_charite.entity.User;
 import com.devbuild.gestion_charite.entity.enums.Role;
+import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
 import com.devbuild.gestion_charite.repository.DonationRepository;
+import com.devbuild.gestion_charite.repository.OrganizationRepository;
 import com.devbuild.gestion_charite.repository.UserRepository;
 
 @RestController
@@ -23,10 +26,16 @@ public class UserController {
 
 	private final UserRepository userRepository;
 	private final DonationRepository donationRepository;
+	private final OrganizationRepository organizationRepository;
 
-	public UserController(UserRepository userRepository, DonationRepository donationRepository) {
+	public UserController(
+			UserRepository userRepository,
+			DonationRepository donationRepository,
+			OrganizationRepository organizationRepository
+	) {
 		this.userRepository = userRepository;
 		this.donationRepository = donationRepository;
+		this.organizationRepository = organizationRepository;
 	}
 
 	@GetMapping
@@ -76,5 +85,27 @@ public class UserController {
 			return ResponseEntity.notFound().build();
 		}
 		return ResponseEntity.ok(donationRepository.findByDonorUserIdOrderByCreatedAtDesc(id));
+	}
+
+	@PutMapping("/{id}/join-organization/{organizationId}")
+	public ResponseEntity<?> joinOrganization(@PathVariable Long id, @PathVariable Long organizationId) {
+		User user = userRepository.findById(id).orElse(null);
+		if (user == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Organization organization = organizationRepository.findById(organizationId).orElse(null);
+		if (organization == null) {
+			return ResponseEntity.badRequest().body(java.util.Map.of("error", "Organisation introuvable"));
+		}
+		if (organization.getStatus() != OrganizationStatus.ACTIVE) {
+			return ResponseEntity.badRequest().body(java.util.Map.of("error", "Seules les organisations ACTIVE peuvent etre rejointes"));
+		}
+
+		user.setJoinedOrganizationId(organization.getId());
+		user.setJoinedOrganizationName(organization.getName());
+		User saved = userRepository.save(user);
+
+		return ResponseEntity.ok(saved);
 	}
 }

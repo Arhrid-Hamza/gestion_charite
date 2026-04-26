@@ -48,6 +48,7 @@ public class GestionChariteApplication {
 				organization.setTaxIdentificationNumber("MA001234567890");
 				organization.setPrimaryContactName("Ahmed Hassan");
 				organization.setPrimaryContactEmail("contact@hope.org");
+				organization.setPassword("Hope@12345");
 				organization.setPrimaryContactPhone("+212 5XX-XXXXXX");
 				organization.setDescription("A nonprofit organization dedicated to helping underprivileged communities");
 				organization.setMission("To provide education, healthcare, and community support services");

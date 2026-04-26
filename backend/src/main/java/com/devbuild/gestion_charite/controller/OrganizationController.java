@@ -1,6 +1,11 @@
 package com.devbuild.gestion_charite.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,14 +45,56 @@ public class OrganizationController {
 
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody Organization organization) {
-		if (organizationRepository.existsByTaxIdentificationNumber(organization.getTaxIdentificationNumber())) {
-			return ResponseEntity.badRequest().body("Numero d'identification fiscale deja utilise");
+		try {
+			// Validate required fields
+			if (organization.getName() == null || organization.getName().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Le nom de l'organisation est requis"));
+			}
+			if (organization.getLegalAddress() == null || organization.getLegalAddress().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "L'adresse légale est requise"));
+			}
+			if (organization.getTaxIdentificationNumber() == null || organization.getTaxIdentificationNumber().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Le numéro d'identification fiscale est requis"));
+			}
+			if (organization.getPrimaryContactName() == null || organization.getPrimaryContactName().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Le nom du contact principal est requis"));
+			}
+			if (organization.getPrimaryContactEmail() == null || organization.getPrimaryContactEmail().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "L'email du contact principal est requis"));
+			}
+			if (organization.getPassword() == null || organization.getPassword().isBlank()) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Le mot de passe est requis"));
+			}
+
+			if (organizationRepository.existsByTaxIdentificationNumber(organization.getTaxIdentificationNumber())) {
+				return ResponseEntity.badRequest().body(Map.of("error", "Numero d'identification fiscale deja utilise"));
+			}
+			organization.setId(null);
+			organization.setPassword(hashPassword(organization.getPassword()));
+			if (organization.getStatus() == null) {
+				organization.setStatus(OrganizationStatus.PENDING);
+			}
+			return ResponseEntity.ok(organizationRepository.save(organization));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(Map.of("error", "Erreur lors de la création de l'organisation: " + e.getMessage()));
 		}
-		organization.setId(null);
-		if (organization.getStatus() == null) {
-			organization.setStatus(OrganizationStatus.PENDING);
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+		String email = credentials.get("email");
+		String password = credentials.get("password");
+
+		if (email == null || email.isBlank() || password == null || password.isBlank()) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Email et mot de passe requis"));
 		}
-		return ResponseEntity.ok(organizationRepository.save(organization));
+
+		return organizationRepository.findAll().stream()
+				.filter(org -> email.equalsIgnoreCase(org.getPrimaryContactEmail()))
+				.findFirst()
+				.filter(org -> org.getPassword().equals(hashPassword(password)))
+				.<ResponseEntity<?>>map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Identifiants organisation invalides")));
 	}
 
 	@PutMapping("/{id}")
@@ -101,5 +148,15 @@ public class OrganizationController {
 		}
 		organizationRepository.deleteById(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	private String hashPassword(String password) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hashed = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+			return Base64.getEncoder().encodeToString(hashed);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Impossible de hacher le mot de passe", e);
+		}
 	}
 }

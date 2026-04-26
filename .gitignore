@@ -33,3 +33,9 @@ build/
 .vscode/
 
 .fake
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+backend/src/main/resources/application-local.properties

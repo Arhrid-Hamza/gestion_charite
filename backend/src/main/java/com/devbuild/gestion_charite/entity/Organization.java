@@ -1,6 +1,7 @@
 package com.devbuild.gestion_charite.entity;
 
 import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,6 +42,10 @@ public class Organization {
 	@Column(nullable = false)
 	private String primaryContactEmail;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@Column(nullable = true)
+	private String password;
+
 	private String primaryContactPhone;
 
 	private String logoUrl;
@@ -57,10 +62,4 @@ public class Organization {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private OrganizationStatus status;
-
-    public void setEmail(String mail) {
-    }
-
-	public void setAddress(String casablanca) {
-	}
 }

@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
+function normalizeApiBaseUrl(rawValue: string | undefined) {
+  const base = (rawValue ?? 'http://localhost:8080/api').trim().replace(/\/+$/, '')
+  return /\/api$/i.test(base) ? base : `${base}/api`
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL)
 
 export function useApi() {
   const [error, setError] = useState('')

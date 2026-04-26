@@ -67,6 +67,24 @@
   align-items: center;
 }
 
+.nav-chip {
+  display: flex;
+  align-items: center;
+}
+
+.nav-chip-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .ms-auto {
   margin-left: auto;
 }

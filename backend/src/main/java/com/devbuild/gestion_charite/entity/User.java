@@ -50,6 +50,10 @@ public class User {
 	@Column(length = 1000)
 	private String interests;
 
+	private Long joinedOrganizationId;
+
+	private String joinedOrganizationName;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Role role;

@@ -69,6 +69,9 @@ export const I18N = {
     noPendingOrgs: 'Aucune organisation en attente',
     noParticipations: 'Pas encore de participations',
     role: 'Rôle',
+    availableOrganizations: 'Organisations disponibles',
+    joinOrganization: 'Rejoindre',
+    joinedOrganization: 'Organisation rejointe',
     allRightsReserved: 'Tous droits réservés',
   },
   ar: {
@@ -141,6 +144,9 @@ export const I18N = {
     noPendingOrgs: 'لا توجد منظمات معلقة',
     noParticipations: 'لا توجد مشاركات حتى الآن',
     role: 'الدور',
+    availableOrganizations: 'المنظمات المتاحة',
+    joinOrganization: 'انضمام',
+    joinedOrganization: 'المنظمة المنضم إليها',
     allRightsReserved: 'جميع الحقوق محفوظة',
   },
 } as const

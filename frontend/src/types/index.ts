@@ -14,6 +14,8 @@ export interface User {
   phone?: string
   address?: string
   interests?: string
+  joinedOrganizationId?: number
+  joinedOrganizationName?: string
   createdAt?: string
 }
 

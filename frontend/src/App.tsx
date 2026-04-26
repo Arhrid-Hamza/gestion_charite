@@ -9,10 +9,11 @@ import { DonatePage } from './components/DonatePage'
 import { ProfilePage } from './components/ProfilePage'
 import { ParticipatePage } from './components/ParticipatePage'
 import { OrganizationPage } from './components/OrganizationPage'
+import { OrganizationDashboard } from './components/OrganizationDashboard'
 import { AdminPage } from './components/AdminPage'
 import './App.css'
 
-type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin'
+type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
 
 interface DashboardState {
   user: User | null
@@ -36,11 +37,20 @@ function loadSavedUser(): User | null {
   }
 }
 
+function defaultPageForUser(user: User | null): PageType {
+  if (!user) {
+    return 'auth'
+  }
+  return user.role === 'ORGANIZER' ? 'org-dashboard' : 'dashboard'
+}
+
 export function App() {
+  const savedUser = loadSavedUser()
+
   const [state, setState] = useState<DashboardState>({
-    user: loadSavedUser(),
+    user: savedUser,
     locale: (localStorage.getItem('locale') as Locale) || 'fr',
-    currentPage: loadSavedUser() ? 'dashboard' : 'auth',
+    currentPage: defaultPageForUser(savedUser),
     selectedAction: null,
     selectedOrg: null,
   })
@@ -65,9 +75,18 @@ export function App() {
   }
 
   function handleNavigate(page: PageType) {
-    if (state.user || page === 'auth') {
-      setState((prev) => ({ ...prev, currentPage: page, selectedAction: null }))
-    }
+    setState((prev) => {
+      if (!prev.user && page !== 'auth') {
+        return prev
+      }
+
+      let resolvedPage = page
+      if (prev.user?.role === 'ORGANIZER' && page === 'dashboard') {
+        resolvedPage = 'org-dashboard'
+      }
+
+      return { ...prev, currentPage: resolvedPage, selectedAction: null }
+    })
   }
 
   function handleAuthSuccess(user: User) {
@@ -75,6 +94,14 @@ export function App() {
       ...prev,
       user,
       currentPage: 'dashboard',
+    }))
+  }
+
+  function handleOrgAuthSuccess(user: User) {
+    setState((prev) => ({
+      ...prev,
+      user,
+      currentPage: 'org-dashboard',
     }))
   }
 
@@ -113,7 +140,11 @@ export function App() {
           locale={state.locale}
           onLocaleChange={handleLocaleChange}
         />
-        <AuthPage locale={state.locale} onAuthSuccess={handleAuthSuccess} />
+        <AuthPage 
+          locale={state.locale} 
+          onAuthSuccess={handleAuthSuccess}
+          onOrgAuthSuccess={handleOrgAuthSuccess}
+        />
       </div>
     )
   }
@@ -196,11 +227,22 @@ export function App() {
           <ParticipatePage locale={state.locale} userId={state.user.id} />
         )}
 
+        {state.currentPage === 'org-dashboard' && state.user.role === 'ORGANIZER' && (
+          <OrganizationDashboard 
+            locale={state.locale} 
+            user={state.user} 
+            onNavigate={handleNavigate}
+          />
+        )}
+
         {state.currentPage === 'organization' && (
           <OrganizationPage
             locale={state.locale}
             userId={state.user.id}
+            userRole={state.user.role}
+            currentUser={state.user}
             onOrgCreated={handleOrgCreated}
+            onUserUpdated={handleProfileUpdate}
           />
         )}
 

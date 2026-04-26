@@ -70,6 +70,18 @@ Frontend uses the following environment variable:
 
 An example file is available in frontend/.env.example.
 
+Backend Google OAuth uses these environment variables:
+
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_REDIRECT_URI (default: http://localhost:8080/api/auth/google/callback)
+- APP_FRONTEND_URL (default: http://localhost:5173)
+
+Quick checks:
+
+- GET /api/auth/google/config returns `configured: true` when backend credentials are set.
+- GET /api/auth/google/start starts the OAuth redirect flow.
+
 ## API Summary
 
 Base URL: http://localhost:8080/api
