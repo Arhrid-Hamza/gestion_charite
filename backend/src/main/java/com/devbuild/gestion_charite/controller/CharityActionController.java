@@ -20,6 +20,7 @@ import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
 import com.devbuild.gestion_charite.repository.CharityActionRepository;
 import com.devbuild.gestion_charite.repository.OrganizationRepository;
 import com.devbuild.gestion_charite.repository.UserRepository;
+import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/charity-actions")
@@ -28,15 +29,18 @@ public class CharityActionController {
 	private final CharityActionRepository charityActionRepository;
 	private final OrganizationRepository organizationRepository;
 	private final UserRepository userRepository;
+	private final MongoSequenceService mongoSequenceService;
 
 	public CharityActionController(
 			CharityActionRepository charityActionRepository,
 			OrganizationRepository organizationRepository,
-			UserRepository userRepository
+			UserRepository userRepository,
+			MongoSequenceService mongoSequenceService
 	) {
 		this.charityActionRepository = charityActionRepository;
 		this.organizationRepository = organizationRepository;
 		this.userRepository = userRepository;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@GetMapping
@@ -46,7 +50,7 @@ public class CharityActionController {
 			@org.springframework.web.bind.annotation.RequestParam(defaultValue = "false") boolean popular
 	) {
 		if (popular) {
-			return charityActionRepository.findPopularActions();
+			return charityActionRepository.findAllByOrderByCollectedAmountDesc();
 		}
 		if (category != null && !category.isBlank()) {
 			return charityActionRepository.findByCategoryNameIgnoreCase(category);
@@ -66,7 +70,7 @@ public class CharityActionController {
 
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody CharityAction action) {
-		action.setId(null);
+		action.setId(mongoSequenceService.nextId("charity_actions"));
 		if (action.getCollectedAmount() == null) {
 			action.setCollectedAmount(BigDecimal.ZERO);
 		}
@@ -133,7 +137,7 @@ public class CharityActionController {
 				.map(user -> {
 					String interests = user.getInterests();
 					if (interests == null || interests.isBlank()) {
-						return ResponseEntity.ok(charityActionRepository.findPopularActions().stream().limit(10).toList());
+						return ResponseEntity.ok(charityActionRepository.findAllByOrderByCollectedAmountDesc().stream().limit(10).toList());
 					}
 					String[] categories = interests.split(",");
 					java.util.LinkedHashMap<Long, CharityAction> deduplicated = new java.util.LinkedHashMap<>();

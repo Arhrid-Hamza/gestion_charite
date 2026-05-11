@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.devbuild.gestion_charite.entity.User;
 import com.devbuild.gestion_charite.entity.enums.Role;
 import com.devbuild.gestion_charite.repository.UserRepository;
+import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,6 +44,7 @@ public class AuthController {
 
 	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
+	private final MongoSequenceService mongoSequenceService;
 
 	@Value("${app.oauth.google.client-id:}")
 	private String googleClientId;
@@ -56,9 +58,10 @@ public class AuthController {
 	@Value("${app.frontend-url:http://localhost:5173}")
 	private String frontendUrl;
 
-	public AuthController(UserRepository userRepository, ObjectMapper objectMapper) {
+	public AuthController(UserRepository userRepository, ObjectMapper objectMapper, MongoSequenceService mongoSequenceService) {
 		this.userRepository = userRepository;
 		this.objectMapper = objectMapper;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@GetMapping("/ping")
@@ -179,6 +182,7 @@ public class AuthController {
 		}
 
 		User user = new User();
+		user.setId(mongoSequenceService.nextId("users"));
 		user.setFullName(request.fullName());
 		user.setEmail(request.email());
 		user.setPasswordHash(hashPassword(request.password()));
@@ -245,6 +249,7 @@ public class AuthController {
 
 		if (user == null) {
 			user = new User();
+			user.setId(mongoSequenceService.nextId("users"));
 			user.setFullName(identity.fullName());
 			user.setEmail(identity.email());
 			user.setPasswordHash(hashPassword("google-oauth-placeholder"));

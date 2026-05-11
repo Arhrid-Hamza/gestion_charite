@@ -2,21 +2,15 @@ package com.devbuild.gestion_charite.entity;
 
 import com.devbuild.gestion_charite.entity.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,16 +18,13 @@ import lombok.Setter;
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
 	private String fullName;
 
-	@Column(nullable = false, unique = true)
+	@Indexed(unique = true)
 	private String email;
 
-	@Column(nullable = false)
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String passwordHash;
 
@@ -41,20 +32,16 @@ public class User {
 
 	private String address;
 
-	@Column(nullable = false)
 	private String preferredLanguage;
 
-	@Column(unique = true)
+	@Indexed(unique = true, sparse = true)
 	private String googleSubject;
 
-	@Column(length = 1000)
 	private String interests;
 
 	private Long joinedOrganizationId;
 
 	private String joinedOrganizationName;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
 	private Role role;
 }

@@ -30,7 +30,7 @@ export interface Organization {
   logoUrl?: string
   description?: string
   mission?: string
-  adminUserId: number
+  adminUserId?: number
   status: OrganizationStatus
   createdAt?: string
 }

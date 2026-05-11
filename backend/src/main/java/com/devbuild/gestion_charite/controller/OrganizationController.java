@@ -20,15 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devbuild.gestion_charite.entity.Organization;
 import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
 import com.devbuild.gestion_charite.repository.OrganizationRepository;
+import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/organizations")
 public class OrganizationController {
 
 	private final OrganizationRepository organizationRepository;
+	private final MongoSequenceService mongoSequenceService;
 
-	public OrganizationController(OrganizationRepository organizationRepository) {
+	public OrganizationController(OrganizationRepository organizationRepository, MongoSequenceService mongoSequenceService) {
 		this.organizationRepository = organizationRepository;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@GetMapping
@@ -69,7 +72,7 @@ public class OrganizationController {
 			if (organizationRepository.existsByTaxIdentificationNumber(organization.getTaxIdentificationNumber())) {
 				return ResponseEntity.badRequest().body(Map.of("error", "Numero d'identification fiscale deja utilise"));
 			}
-			organization.setId(null);
+			organization.setId(mongoSequenceService.nextId("organizations"));
 			organization.setPassword(hashPassword(organization.getPassword()));
 			if (organization.getStatus() == null) {
 				organization.setStatus(OrganizationStatus.PENDING);

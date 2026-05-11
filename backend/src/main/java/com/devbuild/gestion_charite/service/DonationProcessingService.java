@@ -22,15 +22,18 @@ public class DonationProcessingService {
 	private final DonationRepository donationRepository;
 	private final CharityActionRepository charityActionRepository;
 	private final UserRepository userRepository;
+	private final MongoSequenceService mongoSequenceService;
 
 	public DonationProcessingService(
 			DonationRepository donationRepository,
 			CharityActionRepository charityActionRepository,
-			UserRepository userRepository
+			UserRepository userRepository,
+			MongoSequenceService mongoSequenceService
 	) {
 		this.donationRepository = donationRepository;
 		this.charityActionRepository = charityActionRepository;
 		this.userRepository = userRepository;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@Transactional
@@ -71,6 +74,7 @@ public class DonationProcessingService {
 		donation.setTransactionId(normalizedTransactionId);
 		donation.setStatus(DonationStatus.CONFIRMED);
 		donation.setCreatedAt(LocalDateTime.now());
+		donation.setId(mongoSequenceService.nextId("donations"));
 
 		Donation savedDonation = donationRepository.save(donation);
 

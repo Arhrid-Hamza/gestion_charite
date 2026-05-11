@@ -19,6 +19,7 @@ import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
 import com.devbuild.gestion_charite.repository.DonationRepository;
 import com.devbuild.gestion_charite.repository.OrganizationRepository;
 import com.devbuild.gestion_charite.repository.UserRepository;
+import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,15 +28,18 @@ public class UserController {
 	private final UserRepository userRepository;
 	private final DonationRepository donationRepository;
 	private final OrganizationRepository organizationRepository;
+	private final MongoSequenceService mongoSequenceService;
 
 	public UserController(
 			UserRepository userRepository,
 			DonationRepository donationRepository,
-			OrganizationRepository organizationRepository
+			OrganizationRepository organizationRepository,
+			MongoSequenceService mongoSequenceService
 	) {
 		this.userRepository = userRepository;
 		this.donationRepository = donationRepository;
 		this.organizationRepository = organizationRepository;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@GetMapping
@@ -52,7 +56,7 @@ public class UserController {
 
 	@PostMapping
 	public User create(@RequestBody User user) {
-		user.setId(null);
+		user.setId(mongoSequenceService.nextId("users"));
 		if (user.getRole() == null) {
 			user.setRole(Role.DONOR);
 		}

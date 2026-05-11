@@ -15,6 +15,7 @@ import com.devbuild.gestion_charite.entity.Participation;
 import com.devbuild.gestion_charite.repository.CharityActionRepository;
 import com.devbuild.gestion_charite.repository.ParticipationRepository;
 import com.devbuild.gestion_charite.repository.UserRepository;
+import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/participations")
@@ -23,15 +24,18 @@ public class ParticipationController {
 	private final ParticipationRepository participationRepository;
 	private final UserRepository userRepository;
 	private final CharityActionRepository charityActionRepository;
+	private final MongoSequenceService mongoSequenceService;
 
 	public ParticipationController(
 			ParticipationRepository participationRepository,
 			UserRepository userRepository,
-			CharityActionRepository charityActionRepository
+			CharityActionRepository charityActionRepository,
+			MongoSequenceService mongoSequenceService
 	) {
 		this.participationRepository = participationRepository;
 		this.userRepository = userRepository;
 		this.charityActionRepository = charityActionRepository;
+		this.mongoSequenceService = mongoSequenceService;
 	}
 
 	@GetMapping
@@ -61,7 +65,7 @@ public class ParticipationController {
 			return ResponseEntity.badRequest().body("Action introuvable");
 		}
 
-		participation.setId(null);
+		participation.setId(mongoSequenceService.nextId("participations"));
 		if (participation.getJoinedAt() == null) {
 			participation.setJoinedAt(LocalDateTime.now());
 		}

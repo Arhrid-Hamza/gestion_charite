@@ -9,13 +9,13 @@ The project is structured with a Spring Boot backend and a React + TypeScript fr
 This application demonstrates a modern web architecture for nonprofit and donation workflows:
 
 - Backend API for charity actions, donations, users, and organizations
-- In-memory H2 database for quick development and testing
+- MongoDB persistence for development and testing
 - React TypeScript frontend consuming backend endpoints
 - Clean separation of frontend and backend responsibilities
 
 ## Architecture
 
-- Backend: Spring Boot 3.5.11, Spring Web, Spring Data JPA, H2
+- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, MongoDB
 - Frontend: React 19, TypeScript, Vite
 - Communication: REST APIs under /api
 - Development CORS: enabled for frontend at http://localhost:5173
@@ -45,7 +45,12 @@ This application demonstrates a modern web architecture for nonprofit and donati
 Backend will run on:
 
 - http://localhost:8080
-- H2 console: http://localhost:8080/h2-console
+
+MongoDB is expected at:
+
+- mongodb://localhost:27017/gestion_charite
+
+If you use Docker Compose, a MongoDB container is started automatically.
 
 ### 2) Run Frontend
 
@@ -114,7 +119,7 @@ npm run build
 ## Notes
 
 - The backend seeds default data on startup when the database is empty.
-- H2 is in-memory by default, so data resets each restart.
+- MongoDB data persists locally when running Docker Compose through the `mongo-data` volume.
 
 ## License
 
