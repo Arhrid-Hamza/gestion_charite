@@ -1,0 +1,56 @@
+.header-hero {
+  background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
+  padding: 1rem 0;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-kicker {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.user-name {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.lang-select {
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+}

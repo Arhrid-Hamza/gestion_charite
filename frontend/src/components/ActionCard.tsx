@@ -1,6 +1,6 @@
 import type { CharityAction, Locale } from '../types'
 import { I18N } from '../types/i18n'
-import './ActionCard.css'
+import '../styles/ActionCard_new.css'
 
 interface ActionCardProps {
   action: CharityAction

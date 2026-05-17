@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Locale } from '../types'
 import { I18N } from '../types/i18n'
-import './Header.css'
+import '../styles/Header.css'
 
 interface HeaderProps {
   locale: Locale

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useEffect } from 'react'
 import type { Locale, User } from '../types'
 import { I18N } from '../types/i18n'
-import './Layout.css'
+import '../styles/Layout.css'
 
 interface LayoutProps {
   locale: Locale
@@ -27,6 +28,83 @@ export function Layout({
   const t = I18N[locale]
   const [menuOpen, setMenuOpen] = useState(false)
   const isOrganizerSession = user?.role === 'ORGANIZER'
+
+  function getPageLabel(page: PageType) {
+    const labels: Record<PageType, string> = {
+      auth: (t.auth as string) || 'Auth',
+      dashboard: (t.dashboardDesc as string) || 'Dashboard',
+      explore: (t.explore as string) || 'Explore',
+      donate: (t.donate as string) || 'Donate',
+      profile: (t.profile as string) || 'Profile',
+      participate: (t.participate as string) || 'Participate',
+      organization: (t.organization as string) || 'Organization',
+      admin: (t.admin as string) || 'Admin',
+      'org-dashboard': 'Organization Dashboard',
+    }
+
+    return labels[page] ?? String(page)
+  }
+
+  function getPageSlug(page: PageType) {
+    const slugs: Record<PageType, string> = {
+      auth: 'auth',
+      dashboard: 'dashboard',
+      explore: 'explore',
+      donate: 'donate',
+      profile: 'profile',
+      participate: 'participate',
+      organization: 'organization',
+      admin: 'admin',
+      'org-dashboard': 'org-dashboard',
+    }
+
+    return slugs[page] ?? String(page)
+  }
+
+  useEffect(() => {
+    try {
+      const host = window.location.hostname || 'localhost'
+      const port = window.location.port || '5173'
+      const slug = getPageSlug(currentPage)
+
+      let label = ''
+      switch (currentPage) {
+        case 'auth':
+          label = (t.auth as string) || 'Auth'
+          break
+        case 'dashboard':
+          label = (t.dashboardDesc as string) || 'Dashboard'
+          break
+        case 'explore':
+          label = (t.explore as string) || 'Explore'
+          break
+        case 'donate':
+          label = (t.donate as string) || 'Donate'
+          break
+        case 'profile':
+          label = (t.profile as string) || 'Profile'
+          break
+        case 'participate':
+          label = (t.participate as string) || 'Participate'
+          break
+        case 'organization':
+          label = (t.organization as string) || 'Organization'
+          break
+        case 'admin':
+          label = (t.admin as string) || 'Admin'
+          break
+        case 'org-dashboard':
+          label = 'Organization Dashboard'
+          break
+        default:
+          label = String(currentPage)
+      }
+
+      document.title = `${label} — ${host}:${port}/${slug}`
+    } catch (e) {
+      // ignore in non-browser environments
+    }
+  }, [currentPage, locale, t])
 
   function isActive(page: PageType) {
     return currentPage === page
@@ -173,6 +251,12 @@ export function Layout({
           </div>
         </div>
       </nav>
+
+      <div className="page-header">
+        <div className="container">
+          <h2 className="page-title">{getPageLabel(currentPage)}</h2>
+        </div>
+      </div>
 
       <div className="container layout-container">{children}</div>
 

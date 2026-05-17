@@ -261,10 +261,6 @@ progress.progress-bar::-moz-progress-bar {
   min-width: 100px;
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
 @media (max-width: 768px) {
   .action-card-body {
     padding: 1.25rem;

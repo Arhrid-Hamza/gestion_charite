@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/purity */
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { useApi } from '../hooks/useApi'
@@ -114,6 +116,17 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
 
     void completeGoogleLogin()
   }, [call, onAuthSuccess, setError])
+
+  useEffect(() => {
+    try {
+      const host = window.location.hostname || 'localhost'
+      const port = window.location.port || '5173'
+      const pagePart = authType === 'user' ? activeTab : `org-${activeTab}`
+      document.title = `${pagePart.charAt(0).toUpperCase() + pagePart.slice(1)} — ${host}:${port}/${pagePart.replace('org-', '')}`
+    } catch (e) {
+      // ignore in non-browser environments
+    }
+  }, [activeTab, authType])
 
   async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

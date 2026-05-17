@@ -3,7 +3,7 @@ import type { User, Organization, CharityAction } from '../types'
 import { useApi } from '../hooks/useApi'
 import type { Locale } from '../types'
 import { Alert } from './Header'
-import './OrganizationDashboard.css'
+import '../styles/OrganizationDashboard.css'
 
 type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
 
