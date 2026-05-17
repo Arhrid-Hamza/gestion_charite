@@ -59,79 +59,89 @@ export function ExplorePage({ locale, userId, onActionSelect }: ExplorePageProps
   }
 
   return (
-    <div className="explore-page py-5">
+    <div className="explore-page">
       <div className="container">
         {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
+        {/* Hero banner */}
+        <div className="explore-hero">
+          <h2>🔍 {t.explore}</h2>
+          <p>Découvrez des actions caritatives et trouvez la cause qui vous correspond</p>
+        </div>
+
+        {/* Filter bar */}
         <div className="explore-filters">
-          <h2>{t.explore}</h2>
+          <div className="explore-filters-row">
 
-          <div className="row mb-3">
-            <div className="col-md-3">
-              <div className="mb-3">
-                <label htmlFor="category" className="form-label">{t.category}</label>
-                <select
-                  id="category"
-                  className="form-select"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  <option value="">Toutes</option>
-                  <option value="education">Éducation</option>
-                  <option value="sante">Santé</option>
-                  <option value="environnement">Environnement</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="filter-check">
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    id="popular"
-                    className="form-check-input"
-                    checked={popular}
-                    onChange={(e) => setPopular(e.target.checked)}
-                  />
-                  <label htmlFor="popular" className="form-check-label">
-                    {t.popular}
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6 text-end">
-              <button 
-                onClick={() => void loadRecommended()}
-                className="btn btn-outline-primary btn-sm"
+            {/* Category select */}
+            <div className="filter-group">
+              <span className="filter-label">{t.category}</span>
+              <select
+                id="category"
+                className="filter-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
               >
-                {t.recommendations}
-              </button>
+                <option value="">Toutes les catégories</option>
+                <option value="education">Éducation</option>
+                <option value="sante">Santé</option>
+                <option value="environnement">Environnement</option>
+              </select>
             </div>
+
+            {/* Popular toggle */}
+            <div className="filter-group">
+              <span className="filter-label">&nbsp;</span>
+              <div
+                className={`toggle-pill${popular ? ' active' : ''}`}
+                onClick={() => setPopular((p) => !p)}
+              >
+                <div className="check-box">{popular ? '✓' : ''}</div>
+                {t.popular}
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <button
+              className="btn-recommend"
+              onClick={() => void loadRecommended()}
+            >
+              ✨ {t.recommendations}
+            </button>
           </div>
         </div>
 
-        {isLoading ? (
-          <Loader message={t.loading} />
-        ) : (
-          <div className="row g-4">
-            {actions.map((action) => (
-              <div key={action.id} className="col-md-4 col-sm-6 col-xs-12">
-                <ActionCard
-                  action={action}
-                  locale={locale}
-                  onSelect={(a) => onActionSelect?.(a)}
-                />
-              </div>
-            ))}
+        {/* Section header */}
+        {!isLoading && (
+          <div className="section-header">
+            <h3>Actions disponibles</h3>
+            <span className="result-count">{actions.length} résultat{actions.length !== 1 ? 's' : ''}</span>
           </div>
         )}
 
-        {!isLoading && actions.length === 0 && (
-          <div className="no-actions">
-            <p>{t.noActions}</p>
-          </div>
+        {/* Loading state */}
+        {isLoading ? (
+          <Loader message={t.loading} />
+        ) : (
+          <>
+            {actions.length > 0 ? (
+              <div className="actions-grid">
+                {actions.map((action) => (
+                  <ActionCard
+                    key={action.id}
+                    action={action}
+                    locale={locale}
+                    onSelect={(a) => onActionSelect?.(a)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="no-actions">
+                <div className="no-actions-icon">🔍</div>
+                <p>{t.noActions}</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
