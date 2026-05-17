@@ -26,6 +26,11 @@ interface DonatePageProps {
   onSuccess?: (donation: Donation) => void
 }
 
+const PRESET_AMOUNTS = [10, 25, 50, 100, 250]
+
+const STEPS = ['amount', 'details', 'confirm'] as const
+type Step = typeof STEPS[number]
+
 export function DonatePage({
   locale,
   userId,
@@ -35,198 +40,308 @@ export function DonatePage({
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
 
+  const [step, setStep] = useState<Step>('amount')
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
   const [actionIdInput, setActionIdInput] = useState(selectedAction?.id ? String(selectedAction.id) : '')
   const [amount, setAmount] = useState('50')
+  const [customAmount, setCustomAmount] = useState(false)
   const [message, setMessage] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PAYPAL')
   const [success, setSuccess] = useState('')
+  const [donated, setDonated] = useState(false)
+
   const parsedActionId = Number.parseInt(actionIdInput, 10)
   const isActionIdValid = Number.isInteger(parsedActionId) && parsedActionId > 0
+  const parsedAmount = parseFloat(amount)
+  const isAmountValid = !Number.isNaN(parsedAmount) && parsedAmount > 0
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const paymentState = params.get('payment')
-
-    if (!paymentState) {
-      return
-    }
+    if (!paymentState) return
 
     async function finalizePayment() {
       try {
         if (paymentState === 'paypal-success') {
           const orderId = params.get('token')
           const rawPendingDonation = localStorage.getItem(PENDING_DONATION_KEY)
-          if (!orderId || !rawPendingDonation) {
-            setError('Paiement PayPal invalide ou expiré')
-            return
-          }
-
+          if (!orderId || !rawPendingDonation) { setError('Paiement PayPal invalide ou expiré'); return }
           const pendingDonation = JSON.parse(rawPendingDonation) as PaymentRequest
           const response = await call<ProviderResponse>(`/payments/paypal/capture/${orderId}`, {
-            method: 'POST',
-            body: JSON.stringify(pendingDonation),
+            method: 'POST', body: JSON.stringify(pendingDonation),
           })
-
           localStorage.removeItem(PENDING_DONATION_KEY)
           setSuccess('Don PayPal confirmé avec succès!')
-          if (response.donation) {
-            onSuccess?.(response.donation)
-          }
+          setDonated(true)
+          if (response.donation) onSuccess?.(response.donation)
           return
         }
-
         if (paymentState === 'stripe-success') {
           const sessionId = params.get('session_id')
-          if (!sessionId) {
-            setError('Session Stripe manquante')
-            return
-          }
-
-          const response = await call<ProviderResponse>(`/payments/stripe/confirm-session?sessionId=${encodeURIComponent(sessionId)}`, {
-            method: 'POST',
-          })
-
+          if (!sessionId) { setError('Session Stripe manquante'); return }
+          const response = await call<ProviderResponse>(`/payments/stripe/confirm-session?sessionId=${encodeURIComponent(sessionId)}`, { method: 'POST' })
           setSuccess('Don Stripe confirmé avec succès!')
-          if (response.donation) {
-            onSuccess?.(response.donation)
-          }
+          setDonated(true)
+          if (response.donation) onSuccess?.(response.donation)
           return
         }
-
         if (paymentState === 'paypal-cancel' || paymentState === 'stripe-cancel') {
           setError('Paiement annulé')
-          return
         }
       } catch {
-        // Erreur déjà définie par useApi
+        // error set by useApi
       } finally {
         window.history.replaceState({}, document.title, window.location.pathname)
       }
     }
-
     void finalizePayment()
   }, [call, onSuccess, setError])
 
+  function goTo(next: Step) {
+    const idx = STEPS.indexOf(next)
+    const cur = STEPS.indexOf(step)
+    setDirection(idx > cur ? 'forward' : 'back')
+    setStep(next)
+  }
+
   async function handleDonate() {
-    if (!userId || !isActionIdValid) {
-      setError('Utilisateur ou action non défini')
-      return
-    }
-
+    if (!userId || !isActionIdValid) { setError('Utilisateur ou action non défini'); return }
+    if (!isAmountValid) { setError('Montant invalide'); return }
     setSuccess('')
-
     try {
-      const parsedAmount = parseFloat(amount)
-      if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-        setError('Montant invalide')
-        return
-      }
-
       const paymentRequest: PaymentRequest = {
         actionId: parsedActionId,
         donorUserId: userId,
         amount: parsedAmount,
         message,
       }
-
       if (paymentMethod === 'PAYPAL') {
-        if (!PAYPAL_CLIENT_ID) {
-          setError('PayPal is not configured on frontend. Set VITE_PAYPAL_CLIENT_ID in frontend/.env')
-          return
-        }
-
+        if (!PAYPAL_CLIENT_ID) { setError('PayPal is not configured. Set VITE_PAYPAL_CLIENT_ID in frontend/.env'); return }
         localStorage.setItem(PENDING_DONATION_KEY, JSON.stringify(paymentRequest))
         const response = await call<{ approveUrl: string }>('/payments/paypal/create-order', {
-          method: 'POST',
-          body: JSON.stringify(paymentRequest),
+          method: 'POST', body: JSON.stringify(paymentRequest),
         })
-
         window.location.href = response.approveUrl
         return
       }
-
       const response = await call<{ checkoutUrl: string }>('/payments/stripe/create-checkout-session', {
-        method: 'POST',
-        body: JSON.stringify(paymentRequest),
+        method: 'POST', body: JSON.stringify(paymentRequest),
       })
-
       window.location.href = response.checkoutUrl
     } catch {
-      // Erreur déjà définie
+      // error set by useApi
     }
   }
 
+  if (donated) {
+    return (
+      <div className="dp-wrap">
+        <div className="dp-success-card">
+          <div className="dp-success-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="20" fill="currentColor" opacity=".12" />
+              <path d="M12 20l6 6 10-12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h2 className="dp-success-title">{success || t.donate}</h2>
+          <p className="dp-success-sub">Merci pour votre générosité ✨</p>
+          <button className="dp-btn-primary" onClick={() => { setDonated(false); setSuccess(''); setStep('amount') }}>
+            Faire un autre don
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="donate-page py-5">
-      <div className="container">
-        <div className="row justify-content-md-center">
-          <div className="col-md-6">
-            {error && <Alert type="error" message={error} onClose={() => setError('')} />}
-            {success && <Alert type="success" message={success} />}
+    <div className="dp-wrap">
+      {/* Background blobs */}
+      <div className="dp-blob dp-blob-1" />
+      <div className="dp-blob dp-blob-2" />
 
-            <div className="donate-card">
-              <h2 className="donate-title">{t.donate}</h2>
+      <div className="dp-container">
+        {/* Header */}
+        <div className="dp-header">
+          <div className="dp-header-badge">
+            <span className="dp-heart-icon">♥</span>
+            <span>Faire un don</span>
+          </div>
+          <h1 className="dp-title">{t.donate}</h1>
+          <p className="dp-subtitle">Chaque contribution compte</p>
+        </div>
 
-              <div className="mb-3">
-                <label htmlFor="action-id" className="form-label">{t.charityAction}</label>
+        {/* Alerts */}
+        {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+        {success && <Alert type="success" message={success} />}
+
+        {/* Step pills */}
+        <div className="dp-steps">
+          {(['amount', 'details', 'confirm'] as Step[]).map((s, i) => (
+            <div key={s} className={`dp-step ${step === s ? 'active' : STEPS.indexOf(step) > i ? 'done' : ''}`}>
+              <div className="dp-step-dot">{STEPS.indexOf(step) > i ? '✓' : i + 1}</div>
+              <span className="dp-step-label">
+                {s === 'amount' ? 'Montant' : s === 'details' ? 'Détails' : 'Confirmer'}
+              </span>
+              {i < 2 && <div className="dp-step-line" />}
+            </div>
+          ))}
+        </div>
+
+        {/* Card */}
+        <div className={`dp-card dp-slide-${direction}`} key={step}>
+
+          {/* ── STEP 1: Amount ── */}
+          {step === 'amount' && (
+            <div className="dp-section">
+              <label className="dp-label">{t.charityAction}</label>
+              <div className="dp-action-input-wrap">
+                <span className="dp-input-prefix">#</span>
                 <input
-                  id="action-id"
                   type="number"
-                  className="form-control"
+                  className="dp-input dp-input-with-prefix"
                   value={actionIdInput}
                   onChange={(e) => setActionIdInput(e.target.value)}
-                  required
+                  placeholder="ID de l'action"
                 />
               </div>
 
-              <div className="mb-3">
-                <label htmlFor="amount" className="form-label">{t.amount}</label>
-                <input
-                  id="amount"
-                  type="number"
-                  className="form-control"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="1"
-                  step="10"
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="message" className="form-label">{t.message}</label>
-                <textarea
-                  id="message"
-                  className="form-control"
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={t.messageOptional}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="payment-method" className="form-label">{t.paymentMethod}</label>
-                <select
-                  id="payment-method"
-                  className="form-select"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+              <label className="dp-label dp-label-mt">{t.amount}</label>
+              <div className="dp-presets">
+                {PRESET_AMOUNTS.map(a => (
+                  <button
+                    key={a}
+                    className={`dp-preset-btn ${!customAmount && amount === String(a) ? 'selected' : ''}`}
+                    onClick={() => { setAmount(String(a)); setCustomAmount(false) }}
+                  >
+                    ${a}
+                  </button>
+                ))}
+                <button
+                  className={`dp-preset-btn dp-preset-custom ${customAmount ? 'selected' : ''}`}
+                  onClick={() => setCustomAmount(true)}
                 >
-                  <option value="PAYPAL">PayPal</option>
-                  <option value="STRIPE">Stripe</option>
-                </select>
+                  Autre
+                </button>
+              </div>
+
+              {customAmount && (
+                <div className="dp-custom-amount-wrap">
+                  <span className="dp-currency-sym">$</span>
+                  <input
+                    type="number"
+                    className="dp-input dp-input-currency"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min="1"
+                    placeholder="Montant personnalisé"
+                    autoFocus
+                  />
+                </div>
+              )}
+
+              <div className="dp-amount-preview">
+                <span className="dp-preview-label">Votre don</span>
+                <span className="dp-preview-amount">${isAmountValid ? parsedAmount.toFixed(2) : '0.00'}</span>
               </div>
 
               <button
-                onClick={() => void handleDonate()}
-                disabled={isLoading || !isActionIdValid}
-                className="btn btn-success btn-lg w-100"
+                className="dp-btn-primary dp-btn-full"
+                disabled={!isActionIdValid || !isAmountValid}
+                onClick={() => goTo('details')}
               >
-                {isLoading ? `${t.processing}...` : `${t.donate} $${amount}`}
+                Continuer →
               </button>
             </div>
-          </div>
+          )}
+
+          {/* ── STEP 2: Details ── */}
+          {step === 'details' && (
+            <div className="dp-section">
+              <label className="dp-label">{t.paymentMethod}</label>
+              <div className="dp-pay-grid">
+                <button
+                  className={`dp-pay-btn ${paymentMethod === 'PAYPAL' ? 'selected' : ''}`}
+                  onClick={() => setPaymentMethod('PAYPAL')}
+                >
+                  <span className="dp-pay-logo">P</span>
+                  <div>
+                    <div className="dp-pay-name">PayPal</div>
+                    <div className="dp-pay-sub">Paiement sécurisé</div>
+                  </div>
+                </button>
+                <button
+                  className={`dp-pay-btn ${paymentMethod === 'STRIPE' ? 'selected' : ''}`}
+                  onClick={() => setPaymentMethod('STRIPE')}
+                >
+                  <span className="dp-pay-logo dp-pay-logo-stripe">S</span>
+                  <div>
+                    <div className="dp-pay-name">Stripe</div>
+                    <div className="dp-pay-sub">Carte bancaire</div>
+                  </div>
+                </button>
+              </div>
+
+              <label className="dp-label dp-label-mt">{t.message}</label>
+              <textarea
+                className="dp-textarea"
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={t.messageOptional}
+              />
+
+              <div className="dp-nav-row">
+                <button className="dp-btn-ghost" onClick={() => goTo('amount')}>← Retour</button>
+                <button className="dp-btn-primary" onClick={() => goTo('confirm')}>Continuer →</button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3: Confirm ── */}
+          {step === 'confirm' && (
+            <div className="dp-section">
+              <div className="dp-summary">
+                <div className="dp-summary-row">
+                  <span>Action caritative</span>
+                  <span className="dp-summary-val">#{parsedActionId}</span>
+                </div>
+                <div className="dp-summary-row">
+                  <span>Montant</span>
+                  <span className="dp-summary-val">${parsedAmount.toFixed(2)}</span>
+                </div>
+                <div className="dp-summary-row">
+                  <span>Méthode</span>
+                  <span className="dp-summary-val">{paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</span>
+                </div>
+                {message.trim() && (
+                  <div className="dp-summary-row dp-summary-msg">
+                    <span>Message</span>
+                    <span className="dp-summary-val">{message}</span>
+                  </div>
+                )}
+                <div className="dp-summary-total">
+                  <span>Total</span>
+                  <span className="dp-total-amt">${parsedAmount.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <button
+                className="dp-btn-donate"
+                onClick={() => void handleDonate()}
+                disabled={isLoading}
+              >
+                {isLoading
+                  ? <span className="dp-spinner" />
+                  : <>♥ {t.donate} ${parsedAmount.toFixed(2)}</>}
+              </button>
+
+              <div className="dp-nav-row" style={{ marginTop: '0.75rem' }}>
+                <button className="dp-btn-ghost" onClick={() => goTo('details')}>← Retour</button>
+              </div>
+
+              <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

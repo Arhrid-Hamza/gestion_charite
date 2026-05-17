@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0c7a8a"/>
+      <stop offset="100%" stop-color="#07485a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g transform="translate(600,400)" text-anchor="middle" fill="#fff">
+    <circle cx="0" cy="-80" r="68" fill="rgba(255,255,255,0.12)"/>
+    <text x="0" y="10" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">Solidarity</text>
+    <text x="0" y="80" font-family="Arial, Helvetica, sans-serif" font-size="28" opacity="0.9">Join and support</text>
+  </g>
+</svg>
