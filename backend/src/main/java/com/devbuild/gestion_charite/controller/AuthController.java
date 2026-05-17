@@ -372,6 +372,46 @@ public class AuthController {
 		return value == null ? null : String.valueOf(value);
 	}
 
+	@PostMapping("/create-super-admin")
+	public ResponseEntity<?> createSuperAdmin(@RequestBody CreateSuperAdminRequest request) {
+		if (request.email() == null || request.email().isBlank() || request.password() == null || request.password().isBlank()
+				|| request.fullName() == null || request.fullName().isBlank()) {
+			return ResponseEntity.badRequest().body(Map.of("error", "fullName, email et password sont obligatoires"));
+		}
+
+		// Check if a SUPER_ADMIN already exists
+		long superAdminCount = userRepository.findAll().stream()
+				.filter(u -> u.getRole() == Role.SUPER_ADMIN)
+				.count();
+
+		if (superAdminCount > 0) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Un compte SUPER_ADMIN existe deja. Contactez un administrateur existant."));
+		}
+
+		// Check if email already exists
+		if (userRepository.existsByEmail(request.email())) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Un compte existe deja avec cet email"));
+		}
+
+		User superAdmin = new User();
+		superAdmin.setId(mongoSequenceService.nextId("users"));
+		superAdmin.setFullName(request.fullName());
+		superAdmin.setEmail(request.email());
+		superAdmin.setPasswordHash(hashPassword(request.password()));
+		superAdmin.setPhone(request.phone());
+		superAdmin.setPreferredLanguage(request.preferredLanguage() == null ? "fr" : request.preferredLanguage());
+		superAdmin.setRole(Role.SUPER_ADMIN);
+
+		User saved = userRepository.save(superAdmin);
+		return ResponseEntity.ok(Map.of(
+				"message", "Compte SUPER_ADMIN cree avec succes",
+				"id", saved.getId(),
+				"fullName", saved.getFullName(),
+				"email", saved.getEmail(),
+				"role", saved.getRole().name()
+		));
+	}
+
 	public record RegisterRequest(
 			String fullName,
 			String email,
@@ -391,5 +431,14 @@ public class AuthController {
 	}
 
 	public record GoogleAuthRequest(String googleSubject, String email, String fullName, String idToken) {
+	}
+
+	public record CreateSuperAdminRequest(
+			String fullName,
+			String email,
+			String password,
+			String phone,
+			String preferredLanguage
+	) {
 	}
 }

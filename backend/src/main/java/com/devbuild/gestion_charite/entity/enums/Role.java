@@ -1,7 +1,7 @@
 package com.devbuild.gestion_charite.entity.enums;
 
 public enum Role {
-	ADMIN,
+	SUPER_ADMIN,
 	ORGANIZER,
 	DONOR
 }
