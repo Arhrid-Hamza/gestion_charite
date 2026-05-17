@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Locale, User } from '../types'
 import { I18N } from '../types/i18n'
 import '../styles/Layout.css'
@@ -14,7 +13,27 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
+type PageType =
+  | 'auth'
+  | 'dashboard'
+  | 'explore'
+  | 'donate'
+  | 'profile'
+  | 'participate'
+  | 'organization'
+  | 'admin'
+  | 'org-dashboard'
+
+/** Nav icon mapping per page */
+const NAV_ICONS: Record<string, string> = {
+  explore:      'ti-compass',
+  donate:       'ti-heart',
+  participate:  'ti-users',
+  organization: 'ti-building',
+  profile:      'ti-user-circle',
+  admin:        'ti-shield',
+  'org-dashboard': 'ti-layout-dashboard',
+}
 
 export function Layout({
   locale,
@@ -29,83 +48,6 @@ export function Layout({
   const [menuOpen, setMenuOpen] = useState(false)
   const isOrganizerSession = user?.role === 'ORGANIZER'
 
-  function getPageLabel(page: PageType) {
-    const labels: Record<PageType, string> = {
-      auth: (t.auth as string) || 'Auth',
-      dashboard: (t.dashboardDesc as string) || 'Dashboard',
-      explore: (t.explore as string) || 'Explore',
-      donate: (t.donate as string) || 'Donate',
-      profile: (t.profile as string) || 'Profile',
-      participate: (t.participate as string) || 'Participate',
-      organization: (t.organization as string) || 'Organization',
-      admin: (t.admin as string) || 'Admin',
-      'org-dashboard': 'Organization Dashboard',
-    }
-
-    return labels[page] ?? String(page)
-  }
-
-  function getPageSlug(page: PageType) {
-    const slugs: Record<PageType, string> = {
-      auth: 'auth',
-      dashboard: 'dashboard',
-      explore: 'explore',
-      donate: 'donate',
-      profile: 'profile',
-      participate: 'participate',
-      organization: 'organization',
-      admin: 'admin',
-      'org-dashboard': 'org-dashboard',
-    }
-
-    return slugs[page] ?? String(page)
-  }
-
-  useEffect(() => {
-    try {
-      const host = window.location.hostname || 'localhost'
-      const port = window.location.port || '5173'
-      const slug = getPageSlug(currentPage)
-
-      let label = ''
-      switch (currentPage) {
-        case 'auth':
-          label = (t.auth as string) || 'Auth'
-          break
-        case 'dashboard':
-          label = (t.dashboardDesc as string) || 'Dashboard'
-          break
-        case 'explore':
-          label = (t.explore as string) || 'Explore'
-          break
-        case 'donate':
-          label = (t.donate as string) || 'Donate'
-          break
-        case 'profile':
-          label = (t.profile as string) || 'Profile'
-          break
-        case 'participate':
-          label = (t.participate as string) || 'Participate'
-          break
-        case 'organization':
-          label = (t.organization as string) || 'Organization'
-          break
-        case 'admin':
-          label = (t.admin as string) || 'Admin'
-          break
-        case 'org-dashboard':
-          label = 'Organization Dashboard'
-          break
-        default:
-          label = String(currentPage)
-      }
-
-      document.title = `${label} — ${host}:${port}/${slug}`
-    } catch (e) {
-      // ignore in non-browser environments
-    }
-  }, [currentPage, locale, t])
-
   function isActive(page: PageType) {
     return currentPage === page
   }
@@ -115,153 +57,142 @@ export function Layout({
     setMenuOpen(false)
   }
 
+  function NavBtn({
+    page,
+    label,
+    icon,
+  }: {
+    page: PageType
+    label: string
+    icon: string
+  }) {
+    return (
+      <li className="nav-item">
+        <button
+          className={`nav-link nav-link-btn ${isActive(page) ? 'active' : ''}`}
+          onClick={() => handleNavigate(page)}
+        >
+          <i className={`ti ${icon}`} aria-hidden="true" />
+          {label}
+        </button>
+      </li>
+    )
+  }
+
+  const brandParts = t.brand.split(' ')
+  const brandFirst = brandParts[0]
+  const brandRest  = brandParts.slice(1).join(' ')
+
   return (
     <div className="layout">
-      <nav className="navbar navbar-custom navbar-expand-lg navbar-dark">
+      {/* ── Navbar ───────────────────────────── */}
+      <nav className="navbar-custom">
         <div className="container">
-          <button 
-            className="navbar-brand brand-button" 
-            onClick={() => handleNavigate(isOrganizerSession ? 'org-dashboard' : 'dashboard')}
+          {/* Brand */}
+          <button
+            className="brand-button"
+            onClick={() =>
+              handleNavigate(isOrganizerSession ? 'org-dashboard' : 'dashboard')
+            }
+            aria-label="Accueil"
           >
-            🤝 {t.brand}
+            <span className="brand-logo-wrap">
+              🎗️
+            </span>
+            <span className="brand-name">
+              {brandFirst} <span>{brandRest}</span>
+            </span>
           </button>
+
+          {/* Hamburger */}
           <button
             className="navbar-toggler"
             type="button"
             aria-controls="navbarNav"
             aria-expanded={menuOpen}
-            aria-label="Toggle navigation"
-            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-label="Ouvrir le menu"
+            onClick={() => setMenuOpen((p) => !p)}
           >
-            <span className="navbar-toggler-icon"></span>
+            <span className="navbar-toggler-icon">
+              <span />
+              <span />
+              <span />
+            </span>
           </button>
-          <div className={`navbar-collapse ${menuOpen ? 'show' : ''}`} id="navbarNav">
+
+          {/* Links */}
+          <div
+            className={`navbar-collapse ${menuOpen ? 'show' : ''}`}
+            id="navbarNav"
+          >
             <ul className="navbar-nav ms-auto nav-links">
               {user ? (
                 isOrganizerSession ? (
                   <>
                     <li className="nav-item nav-chip">
-                      <span className="nav-chip-label">Organization Dashboard</span>
+                      <span className="nav-chip-label">Organisation</span>
                     </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${isActive('org-dashboard') ? 'active' : ''}`}
-                        onClick={() => handleNavigate('org-dashboard')}
-                      >
-                        Overview
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${isActive('explore') ? 'active' : ''}`}
-                        onClick={() => handleNavigate('explore')}
-                      >
-                        {t.explore}
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${isActive('profile') ? 'active' : ''}`}
-                        onClick={() => handleNavigate('profile')}
-                      >
-                        {t.profile}
-                      </button>
-                    </li>
+                    <NavBtn page="org-dashboard" label="Aperçu"    icon={NAV_ICONS['org-dashboard']} />
+                    <NavBtn page="explore"       label={t.explore} icon={NAV_ICONS.explore} />
+                    <NavBtn page="profile"       label={t.profile} icon={NAV_ICONS.profile} />
                   </>
                 ) : (
                   <>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${currentPage === 'explore' ? 'active' : ''}`}
-                        onClick={() => handleNavigate('explore')}
-                      >
-                        {t.explore}
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${currentPage === 'donate' ? 'active' : ''}`}
-                        onClick={() => handleNavigate('donate')}
-                      >
-                        {t.donate}
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${currentPage === 'participate' ? 'active' : ''}`}
-                        onClick={() => handleNavigate('participate')}
-                      >
-                        {t.participate}
-                      </button>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${currentPage === 'organization' ? 'active' : ''}`}
-                        onClick={() => handleNavigate('organization')}
-                      >
-                        {t.organization}
-                      </button>
-                    </li>
+                    <NavBtn page="explore"      label={t.explore}      icon={NAV_ICONS.explore} />
+                    <NavBtn page="donate"        label={t.donate}       icon={NAV_ICONS.donate} />
+                    <NavBtn page="participate"   label={t.participate}  icon={NAV_ICONS.participate} />
+                    <NavBtn page="organization"  label={t.organization} icon={NAV_ICONS.organization} />
                     {user.role === 'SUPER_ADMIN' && (
-                      <li className="nav-item">
-                        <button
-                          className={`nav-link nav-link-btn ${currentPage === 'admin' ? 'active' : ''}`}
-                          onClick={() => handleNavigate('admin')}
-                        >
-                          {t.admin}
-                        </button>
-                      </li>
+                      <NavBtn page="admin"  label={t.admin}   icon={NAV_ICONS.admin} />
                     )}
-                    <li className="nav-item">
-                      <button
-                        className={`nav-link nav-link-btn ${currentPage === 'profile' ? 'active' : ''}`}
-                        onClick={() => handleNavigate('profile')}
-                      >
-                        {t.profile}
-                      </button>
-                    </li>
+                    <NavBtn page="profile" label={t.profile} icon={NAV_ICONS.profile} />
                   </>
                 )
               ) : null}
 
-              <li className="nav-divider"></li>
+              <li className="nav-divider" aria-hidden="true" />
 
               <li className="nav-item lang-selector">
-                <select 
-                  value={locale} 
+                <select
+                  value={locale}
                   onChange={(e) => onLocaleChange(e.target.value as Locale)}
-                  className="form-select form-select-sm lang-select-control"
+                  aria-label="Langue"
                 >
                   <option value="fr">FR</option>
                   <option value="ar">AR</option>
                 </select>
               </li>
 
-              {user ? (
+              {user && (
                 <li className="nav-item">
                   <button
                     onClick={onLogout}
                     className="nav-link nav-link-btn logout-link"
                   >
+                    <i className="ti ti-logout" aria-hidden="true" />
                     {t.logout}
                   </button>
                 </li>
-              ) : null}
+              )}
             </ul>
           </div>
         </div>
       </nav>
 
-      <div className="page-header">
-        <div className="container">
-          <h2 className="page-title">{getPageLabel(currentPage)}</h2>
-        </div>
-      </div>
-
+      {/* ── Page content ─────────────────────── */}
       <div className="container layout-container">{children}</div>
 
+      {/* ── Footer ───────────────────────────── */}
       <footer className="layout-footer">
-        <p>&copy; 2026 {t.brand}. {t.allRightsReserved}</p>
+        <div className="container">
+          <div className="footer-brand-row">
+            <span className="logo-emoji">🎗️</span>
+            <span className="footer-brand">
+              {brandFirst} <span>{brandRest}</span>
+            </span>
+          </div>
+          <p className="footer-copy">© 2026 {t.brand}. {t.allRightsReserved}</p>
+        </div>
       </footer>
     </div>
   )
