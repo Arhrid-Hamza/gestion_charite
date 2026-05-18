@@ -8,8 +8,68 @@
   font-family: 'DM Sans', sans-serif;
 }
 
+/* ═══════════════════════════════════════════════════════
+   PAGE-ENTRY ANIMATION — CARTE FORMULAIRE
+   La carte glisse depuis la gauche avec un léger rebond
+═══════════════════════════════════════════════════════ */
+
+@keyframes cardSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.96);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateX(8px) scale(1.005);
+  }
+  80% {
+    transform: translateX(-3px) scale(0.998);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Carte info — entre depuis la droite */
+@keyframes cardSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(60px) scale(0.96);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateX(-8px) scale(1.005);
+  }
+  80% {
+    transform: translateX(3px) scale(0.998);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
 /* ─── Cards ─────────────────────────────────────────────── */
-.org-form-card,
+.org-form-card {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(31, 60, 74, 0.07);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: cardSlideInLeft 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+}
+
 .org-info-card {
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 24px;
@@ -20,14 +80,7 @@
   padding: 2rem;
   margin-bottom: 1.5rem;
   opacity: 0;
-  transform: translateY(20px);
-  animation: cardReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.org-info-card { animation-delay: 0.08s; }
-
-@keyframes cardReveal {
-  to { opacity: 1; transform: none; }
+  animation: cardSlideInRight 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards;
 }
 
 .org-form-card:hover,
@@ -92,6 +145,43 @@
   50%       { opacity: 0; }
 }
 
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS INTERNES AU FORMULAIRE
+   Chaque champ tombe depuis le haut avec un léger délai
+   → animation différente de celle de la carte (X → Y)
+═══════════════════════════════════════════════════════ */
+
+@keyframes fieldDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-22px) rotateX(8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(4px) rotateX(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+/* Appliqué sur chaque .form-animate-item dans le formulaire */
+.form-animate-item {
+  opacity: 0;
+  animation: fieldDropIn 0.45s cubic-bezier(0.34, 1.28, 0.64, 1) forwards;
+}
+
+/* Délais en cascade — jusqu'à 8 items */
+.form-animate-item:nth-child(1)  { animation-delay: 0.30s; }
+.form-animate-item:nth-child(2)  { animation-delay: 0.38s; }
+.form-animate-item:nth-child(3)  { animation-delay: 0.46s; }
+.form-animate-item:nth-child(4)  { animation-delay: 0.54s; }
+.form-animate-item:nth-child(5)  { animation-delay: 0.62s; }
+.form-animate-item:nth-child(6)  { animation-delay: 0.70s; }
+.form-animate-item:nth-child(7)  { animation-delay: 0.78s; }
+.form-animate-item:nth-child(8)  { animation-delay: 0.86s; }
+
 /* ─── Form fields ────────────────────────────────────────── */
 .org-form-card .form-label {
   font-size: 0.78rem;
@@ -105,7 +195,7 @@
   border-radius: 11px;
   padding: 0.65rem 1rem;
   border: 1.5px solid rgba(31, 60, 74, 0.12);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   background-color: rgba(255, 255, 255, 0.95);
   font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem;
@@ -116,6 +206,7 @@
   border-color: #216b68;
   box-shadow: 0 0 0 4px rgba(33, 107, 104, 0.1);
   outline: none;
+  transform: translateY(-1px);
 }
 
 .org-form-card .form-text {
@@ -137,6 +228,23 @@
   font-family: 'DM Sans', sans-serif;
   transition: all 0.3s ease;
   letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer au survol du bouton */
+.org-form-card .btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.45s ease;
+}
+
+.org-form-card .btn-primary:hover:not(:disabled)::after {
+  left: 160%;
 }
 
 .org-form-card .btn-primary:hover:not(:disabled) {
@@ -147,19 +255,40 @@
 
 .org-form-card .btn-primary:active { transform: translateY(0); }
 
-/* ─── Form staggered animations ──────────────────────────── */
-.form-animate-item {
-  opacity: 0;
-  transform: translateY(15px);
-  animation: formItemReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS INTERNES — CARTE INFO (org-info-card)
+   Les lignes d'info glissent depuis la droite, pas de haut
+═══════════════════════════════════════════════════════ */
 
-@keyframes formItemReveal {
-  to {
+@keyframes infoRowSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
+
+.org-info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(31, 60, 74, 0.07);
+  opacity: 0;
+  animation: infoRowSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.org-info-row:nth-child(1) { animation-delay: 0.40s; }
+.org-info-row:nth-child(2) { animation-delay: 0.50s; }
+.org-info-row:nth-child(3) { animation-delay: 0.60s; }
+.org-info-row:nth-child(4) { animation-delay: 0.70s; }
+.org-info-row:nth-child(5) { animation-delay: 0.80s; }
+.org-info-row:nth-child(6) { animation-delay: 0.90s; }
+
+.org-info-row:last-of-type { border-bottom: none; }
 
 /* ─── Status badge ───────────────────────────────────────── */
 .org-status-badge {
@@ -188,17 +317,7 @@
   50%       { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* ─── Info rows ──────────────────────────────────────────── */
-.org-info-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(31, 60, 74, 0.07);
-}
-
-.org-info-row:last-of-type { border-bottom: none; }
-
+/* ─── Info icon / label / value ──────────────────────────── */
 .org-info-icon {
   width: 36px;
   height: 36px;
@@ -223,7 +342,11 @@
   color: #1f3c4a;
 }
 
-/* ─── Org list ───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   LISTE DES ORGANISATIONS
+   Chaque item se déroule avec un fondu + glissement
+═══════════════════════════════════════════════════════ */
+
 .org-list {
   display: flex;
   flex-direction: column;
@@ -231,7 +354,17 @@
   margin-top: 1.25rem;
 }
 
-/* ─── Org item ───────────────────────────────────────────── */
+@keyframes itemSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .org-list-item {
   display: flex;
   justify-content: space-between;
@@ -245,12 +378,7 @@
               box-shadow 0.3s ease,
               border-color 0.3s ease;
   opacity: 0;
-  transform: translateX(-14px);
   animation: itemSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes itemSlide {
-  to { opacity: 1; transform: none; }
 }
 
 .org-list-item:hover {
@@ -356,6 +484,19 @@
 }
 
 /* ─── Responsive ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .org-form-card,
+  .org-info-card,
+  .form-animate-item,
+  .org-info-row,
+  .org-list-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 @media (max-width: 768px) {
   .org-page > .container > .row { flex-direction: column; }
 
