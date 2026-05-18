@@ -3,6 +3,7 @@ import type { User, Organization, CharityAction } from '../types'
 import { useApi } from '../hooks/useApi'
 import type { Locale } from '../types'
 import { Alert } from './Header'
+import { I18N } from '../types/i18n'
 import '../styles/OrganizationDashboard.css'
 
 type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
@@ -53,7 +54,8 @@ function normalizeMediaUrls(value: string) {
     .join(',')
 }
 
-export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboardProps) {
+export function OrganizationDashboard({ locale, user, onNavigate }: OrganizationDashboardProps) {
+  const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
 
   const [organization, setOrganization] = useState<Organization | null>(null)
@@ -233,7 +235,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
         <div className="dashboard-container">
           <div className="org-loading-card">
             <div className="spinner" />
-            <p>Loading organization data...</p>
+            <p>{t.loadingOrgData}</p>
           </div>
         </div>
       </div>
@@ -248,9 +250,9 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
 
         {/* Header */}
         <div className="dashboard-header">
-          <div className="dashboard-kicker">Organization mode</div>
-          <h1 className="dashboard-title">Organization Dashboard</h1>
-          <p className="dashboard-subtitle">Manage your organization, monitor campaigns, and track funding in one place.</p>
+          <div className="dashboard-kicker">{t.orgMode}</div>
+          <h1 className="dashboard-title">{t.orgDashboardTitle}</h1>
+          <p className="dashboard-subtitle">{t.orgDashboardSubtitle}</p>
         </div>
 
         {organization ? (
@@ -259,24 +261,24 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
             <div className="org-metrics-grid">
 
               <div className="metric-card metric-primary">
-                <span className="metric-label">Organization</span>
+                <span className="metric-label">{t.organization}</span>
                 <strong className="metric-value">{organization.name}</strong>
-                <span className="metric-caption">{organization.status} approval status</span>
+                <span className="metric-caption">{organization.status}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Charity actions</span>
+                <span className="metric-label">{t.charityActions}</span>
                 <strong className="metric-value">{actions.length}</strong>
-                <span className="metric-caption">{activeActions} currently active</span>
+                <span className="metric-caption">{activeActions} {t.active}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Raised</span>
+                <span className="metric-label">{t.raised}</span>
                 <strong className="metric-value">${totalRaised.toFixed(2)}</strong>
-                <span className="metric-caption">Across all campaigns</span>
+                <span className="metric-caption">{t.acrossAllCampaigns}</span>
               </div>
               <div className="metric-card">
-                <span className="metric-label">Completion</span>
+                <span className="metric-label">{t.completion}</span>
                 <strong className="metric-value">{completionRate.toFixed(0)}%</strong>
-                <span className="metric-caption">Of total target funding</span>
+                <span className="metric-caption">{t.ofTotalTargetFunding}</span>
               </div>
             </div>
 
@@ -300,22 +302,22 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                     setEditMode(!editMode)
                   }}
                 >
-                  {editMode ? 'Cancel' : 'Edit'}
+                  {editMode ? t.cancel : t.edit}
                 </button>
               </div>
 
               <div className="org-split-panel">
                 <div className="org-summary-panel">
-                  <h3>Dashboard summary</h3>
+                  <h3>{t.dashboardSummary}</h3>
                   <ul className="summary-list">
-                    <li><span>Status</span><strong>{organization.status}</strong></li>
+                    <li><span>{t.status}</span><strong>{organization.status}</strong></li>
                     <li><span>Contact</span><strong>{organization.primaryContactEmail}</strong></li>
-                    <li><span>Address</span><strong>{organization.legalAddress}</strong></li>
+                    <li><span>{t.address}</span><strong>{organization.legalAddress}</strong></li>
                   </ul>
                 </div>
 
                 <div className="org-progress-panel">
-                  <h3>Funding overview</h3>
+                  <h3>{t.fundingOverview}</h3>
                   <div className="org-progress-ring">
                     <span>{completionRate.toFixed(0)}%</span>
                   </div>
@@ -450,7 +452,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                     disabled={isLoading}
                     className="btn btn-primary"
                   >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                    {isLoading ? t.saving : t.saveChanges}
                   </button>
                 </form>
               )}
@@ -459,19 +461,19 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
             {/* Charity Actions Section */}
             <div className="charity-actions-section">
               <div className="section-header">
-                <h2 className="section-title">Charity Actions</h2>
+                <h2 className="section-title">{t.charityActions}</h2>
                 <button 
                   className="btn btn-primary"
                   onClick={handleCreateAction}
                 >
-                  Create action
+                  {t.createActionBtn}
                 </button>
               </div>
 
               {actionFormOpen && (
                 <form onSubmit={(e) => void handleSaveAction(e)} className="org-edit-form mb-4">
                   <div className="form-group">
-                    <label htmlFor="action-title" className="form-label">Title</label>
+                    <label htmlFor="action-title" className="form-label">{t.title}</label>
                     <input
                       id="action-title"
                       type="text"
@@ -483,7 +485,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-description" className="form-label">Description</label>
+                    <label htmlFor="action-description" className="form-label">{t.description}</label>
                     <textarea
                       id="action-description"
                       className="form-input"
@@ -495,7 +497,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-target" className="form-label">Target amount</label>
+                    <label htmlFor="action-target" className="form-label">{t.targetAmountStr}</label>
                     <input
                       id="action-target"
                       type="number"
@@ -509,12 +511,12 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-category" className="form-label">Category</label>
+                    <label htmlFor="action-category" className="form-label">{t.category}</label>
                     <input
                       id="action-category"
                       type="text"
                       className="form-input"
-                      placeholder="education, sante, environnement..."
+                      placeholder={t.categoryPlaceholder}
                       value={actionForm.categoryName}
                       onChange={(e) => setActionForm((prev) => ({ ...prev, categoryName: e.target.value }))}
                       required
@@ -522,7 +524,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-location" className="form-label">Location</label>
+                    <label htmlFor="action-location" className="form-label">{t.location}</label>
                     <input
                       id="action-location"
                       type="text"
@@ -533,7 +535,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-start" className="form-label">Start date</label>
+                    <label htmlFor="action-start" className="form-label">{t.startDate}</label>
                     <input
                       id="action-start"
                       type="date"
@@ -544,7 +546,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-end" className="form-label">End date</label>
+                    <label htmlFor="action-end" className="form-label">{t.endDate}</label>
                     <input
                       id="action-end"
                       type="date"
@@ -555,12 +557,12 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="action-media" className="form-label">Media URLs (images/videos)</label>
+                    <label htmlFor="action-media" className="form-label">{t.mediaUrls}</label>
                     <textarea
                       id="action-media"
                       className="form-input"
                       rows={3}
-                      placeholder="https://...image.jpg, https://...video.mp4"
+                      placeholder={t.mediaUrlsPlaceholder}
                       value={actionForm.mediaUrls}
                       onChange={(e) => setActionForm((prev) => ({ ...prev, mediaUrls: e.target.value }))}
                     />
@@ -572,14 +574,14 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                       disabled={isLoading}
                       className="btn btn-primary"
                     >
-                      {isLoading ? 'Saving...' : actionForm.id ? 'Update action' : 'Create action'}
+                      {isLoading ? t.saving : actionForm.id ? t.updateAction : t.createActionBtn}
                     </button>
                     <button
                       type="button"
                       className="btn btn-secondary"
                       onClick={resetActionForm}
                     >
-                      Cancel
+                      {t.cancel}
                     </button>
                   </div>
                 </form>
@@ -587,7 +589,7 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
 
               {actions.length === 0 ? (
                 <div className="empty-state">
-                  <p>No charity actions yet. Create one to get started!</p>
+                  <p>{t.noActionsYet}</p>
                 </div>
               ) : (
                 <div className="actions-grid">
@@ -620,19 +622,19 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleViewAction(action)}
                         >
-                          View
+                          {t.view}
                         </button>
                         <button 
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleEditAction(action)}
                         >
-                          Edit
+                          {t.edit}
                         </button>
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => void handleArchiveAction(action.id)}
                         >
-                          Archive
+                          {t.archive}
                         </button>
                       </div>
                     </div>
@@ -643,8 +645,8 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
           </>
         ) : (
           <div className="no-organization">
-            <p className="error-message">You are not associated with any organization yet.</p>
-            <p className="info-message">Contact an administrator to link your account to an organization.</p>
+            <p className="error-message">{t.notAssociated}</p>
+            <p className="info-message">{t.contactAdminToLink}</p>
           </div>
         )}
       </div>

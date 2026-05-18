@@ -169,9 +169,9 @@ export function Layout({
                 isOrganizerSession ? (
                   <>
                     <li className="nav-item nav-chip">
-                      <span className="nav-chip-label">Organisation</span>
+                      <span className="nav-chip-label">{t.organization}</span>
                     </li>
-                    <NavBtn page="org-dashboard" label="Aperçu"    icon={NAV_ICONS['org-dashboard']} />
+                    <NavBtn page="org-dashboard" label={t.dashboardSummary}    icon={NAV_ICONS['org-dashboard']} />
                     <NavBtn page="explore"       label={t.explore} icon={NAV_ICONS.explore} />
                     <NavBtn page="profile"       label={t.profile} icon={NAV_ICONS.profile} />
                   </>

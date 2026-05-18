@@ -66,7 +66,7 @@ export function ExplorePage({ locale, userId, onActionSelect }: ExplorePageProps
         {/* Hero banner */}
         <div className="explore-hero">
           <h2>🔍 {t.explore}</h2>
-          <p>Découvrez des actions caritatives et trouvez la cause qui vous correspond</p>
+          <p>{t.exploreSubtitle}</p>
         </div>
 
         {/* Filter bar */}
@@ -82,10 +82,10 @@ export function ExplorePage({ locale, userId, onActionSelect }: ExplorePageProps
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option value="">Toutes les catégories</option>
-                <option value="education">Éducation</option>
-                <option value="sante">Santé</option>
-                <option value="environnement">Environnement</option>
+                <option value="">{t.allCategories}</option>
+                <option value="education">{t.education}</option>
+                <option value="sante">{t.health}</option>
+                <option value="environnement">{t.environment}</option>
               </select>
             </div>
 
@@ -114,8 +114,8 @@ export function ExplorePage({ locale, userId, onActionSelect }: ExplorePageProps
         {/* Section header */}
         {!isLoading && (
           <div className="section-header">
-            <h3>Actions disponibles</h3>
-            <span className="result-count">{actions.length} résultat{actions.length !== 1 ? 's' : ''}</span>
+            <h3>{t.availableActions}</h3>
+            <span className="result-count">{actions.length} {t.action}{actions.length !== 1 ? 's' : ''}</span>
           </div>
         )}
 
