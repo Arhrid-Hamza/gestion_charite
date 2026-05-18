@@ -92,12 +92,44 @@ public class OrganizationController {
 			return ResponseEntity.badRequest().body(Map.of("error", "Email et mot de passe requis"));
 		}
 
-		return organizationRepository.findAll().stream()
+		// Diagnostic: determine whether the stored password is hashed (SHA-256+Base64)
+		// or plaintext (for legacy orgs created with a different logic).
+		java.util.Optional<Organization> orgOpt = organizationRepository.findAll().stream()
+
+				// NOTE: matching is case-insensitive on email
 				.filter(org -> email.equalsIgnoreCase(org.getPrimaryContactEmail()))
-				.findFirst()
-				.filter(org -> org.getPassword().equals(hashPassword(password)))
-				.<ResponseEntity<?>>map(ResponseEntity::ok)
-				.orElseGet(() -> ResponseEntity.status(401).body(Map.of("error", "Identifiants organisation invalides")));
+				.findFirst();
+
+		if (orgOpt.isEmpty()) {
+			return ResponseEntity.status(401).body(Map.of("error", "Identifiants organisation invalides"));
+		}
+
+		Organization org = orgOpt.get();
+		String stored = org.getPassword();
+		if (stored == null) {
+			return ResponseEntity.status(401).body(Map.of("error", "Identifiants organisation invalides"));
+		}
+
+		String hashedIncoming = hashPassword(password);
+		boolean matchesHashed = stored.equals(hashedIncoming);
+		boolean matchesPlain = stored.equals(password);
+
+		// If your DB has mixed formats, accept both to fix existing accounts.
+		if (!matchesHashed && !matchesPlain) {
+			return ResponseEntity.status(401).body(Map.of("error", "Identifiants organisation invalides"));
+		}
+
+		return ResponseEntity.ok(org);
+	}
+
+
+
+
+	@GetMapping("/user/{userId}")
+	public List<Organization> findByAdminUserId(@PathVariable Long userId) {
+		return organizationRepository.findByAdminUserId(userId)
+				.map(java.util.Collections::singletonList)
+				.orElseGet(java.util.Collections::emptyList);
 	}
 
 	@PutMapping("/{id}")

@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import { I18N } from './types/i18n'
 import type { Locale, User, CharityAction, Organization, Donation, Participation } from './types'
 import { Layout } from './components/Layout'
-import { Header } from './components/Header'
+import { Header, Alert } from './components/Header'
 import { AuthPage } from './components/AuthPage'
 import { ExplorePage } from './components/ExplorePage'
 import { DonatePage } from './components/DonatePage'
 import { ProfilePage } from './components/ProfilePage'
+import ErrorBoundary from './components/ErrorBoundary'
 import { ParticipatePage } from './components/ParticipatePage'
 import { OrganizationPage } from './components/OrganizationPage'
 import { OrganizationDashboard } from './components/OrganizationDashboard'
@@ -22,25 +23,63 @@ interface DashboardState {
   currentPage: PageType
   selectedAction: CharityAction | null
   selectedOrg: Organization | null
+  dashboardRefresh: number
+  donationAlert?: string | null
+  profileRefresh: number
 }
 
-function DashboardContent({ user, t, onNavigate }: { user: User, t: any, onNavigate: (page: any) => void }) {
+function DashboardContent({ user, t, onNavigate }: { user: User, t: Record<string, string>, onNavigate: (page: PageType) => void }) {
   const { call } = useApi()
   const [donations, setDonations] = useState<Donation[]>([])
   const [participations, setParticipations] = useState<Participation[]>([])
+  const [organizations, setOrganizations] = useState<Organization[]>([])
 
   useEffect(() => {
     if (!user?.id) return
 
     const load = async () => {
       try {
-        const dona = await call<Donation[]>(`/users/${user.id}/donations`).catch(() => [])
-        const partic = await call<Participation[]>(`/participations/user/${user.id}`).catch(() => [])
+        // Load donations, participations and organizations. For missing endpoints (404)
+        // we silently fall back to an empty list to avoid noisy console errors.
+        let dona: Donation[] = []
+        try {
+          dona = await call<Donation[]>(`/donations/user/${user.id}`)
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e)
+          if (!/404|Not Found/i.test(msg)) console.error('Failed to load donations:', e)
+          dona = []
+        }
+
+        let partic: Participation[] = []
+        try {
+          partic = await call<Participation[]>(`/participations/user/${user.id}`)
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e)
+          if (!/404|Not Found/i.test(msg)) console.error('Failed to load participations:', e)
+          partic = []
+        }
+
+        let orgs: Organization[] = []
+        try {
+          const allOrgs = await call<Organization[]>('/organizations')
+          orgs = (allOrgs || []).filter((org) =>
+            org.adminUserId === user.id ||
+            org.primaryContactEmail?.toLowerCase() === user.email?.toLowerCase()
+          )
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e)
+          if (!/404|Not Found/i.test(msg)) console.error('Failed to load organizations:', e)
+          orgs = []
+        }
+
         setDonations(dona || [])
         setParticipations(partic || [])
-      } catch {
+        setOrganizations(orgs || [])
+      } catch (e) {
+        console.error('Failed to load dashboard data:', e)
         setDonations([])
         setParticipations([])
+        setOrganizations([])
       }
     }
     void load()
@@ -50,7 +89,7 @@ function DashboardContent({ user, t, onNavigate }: { user: User, t: any, onNavig
 
   return (
     <div className="dashboard-hero">
-      <h1>{t.welcome}, {user.fullName}!</h1>
+            <h1>{t.welcome}, {user?.fullName || ''}!</h1>
       <p>{t.dashboardDesc}</p>
 
       <div className="quick-stats">
@@ -58,7 +97,7 @@ function DashboardContent({ user, t, onNavigate }: { user: User, t: any, onNavig
           <span className="stat-icon">🤝</span>
           <div>
             <h4>{t.organization}</h4>
-            <p>0 {t.active}</p>
+            <p>{organizations.length} {t.active}</p>
           </div>
         </div>
         <div className="stat-box">
@@ -122,7 +161,56 @@ export function App() {
     currentPage: defaultPageForUser(savedUser),
     selectedAction: null,
     selectedOrg: null,
+    dashboardRefresh: 0,
+    donationAlert: null,
+    profileRefresh: 0,
   })
+
+  const { call, setError } = useApi()
+
+  // Global payment finalizer: handles provider redirects even when DonatePage isn't mounted.
+  // It finalizes PayPal/Stripe payments and shows a top-level success alert.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paymentState = params.get('payment')
+    if (!paymentState) return
+
+    async function finalizePayment() {
+      try {
+        const PENDING_DONATION_KEY = 'pendingDonationPayment'
+        if (paymentState === 'paypal-success') {
+          const orderId = params.get('token')
+          const rawPendingDonation = localStorage.getItem(PENDING_DONATION_KEY)
+          if (!orderId || !rawPendingDonation) { setError('Paiement PayPal invalide ou expiré'); return }
+          const pendingDonation = JSON.parse(rawPendingDonation)
+          await call(`/payments/paypal/capture/${orderId}`, { method: 'POST', body: JSON.stringify(pendingDonation) })
+          localStorage.removeItem(PENDING_DONATION_KEY)
+          setState((prev) => ({ ...prev, donationAlert: 'Votre don a été enregistré', dashboardRefresh: prev.dashboardRefresh + 1, profileRefresh: (prev.profileRefresh || 0) + 1 }))
+          handleNavigate('dashboard')
+          return
+        }
+
+        if (paymentState === 'stripe-success') {
+          const sessionId = params.get('session_id')
+          if (!sessionId) { setError('Session Stripe manquante'); return }
+          await call(`/payments/stripe/confirm-session?sessionId=${encodeURIComponent(sessionId)}`, { method: 'POST' })
+          setState((prev) => ({ ...prev, donationAlert: 'Votre don a été enregistré', dashboardRefresh: prev.dashboardRefresh + 1, profileRefresh: (prev.profileRefresh || 0) + 1 }))
+          handleNavigate('dashboard')
+          return
+        }
+
+        if (paymentState === 'paypal-cancel' || paymentState === 'stripe-cancel') {
+          setError('Paiement annulé')
+        }
+      } catch {
+        // errors handled by useApi
+      } finally {
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+    }
+
+    void finalizePayment()
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('locale', state.locale)
@@ -146,7 +234,7 @@ export function App() {
   function handleNavigate(page: PageType) {
     setState((prev) => {
       if (!prev.user && page !== 'auth') {
-        return prev
+        return { ...prev, currentPage: 'auth', selectedAction: null, selectedOrg: null };
       }
 
       let resolvedPage = page
@@ -154,7 +242,7 @@ export function App() {
         resolvedPage = 'org-dashboard'
       }
 
-      return { ...prev, currentPage: resolvedPage, selectedAction: null }
+      return { ...prev, currentPage: resolvedPage, selectedAction: null, selectedOrg: null }
     })
   }
 
@@ -229,9 +317,17 @@ export function App() {
         currentPage={state.currentPage}
         onLogout={handleLogout}
       >
-        {state.currentPage === 'dashboard' && state.user && (
-          <DashboardContent user={state.user} t={t} onNavigate={handleNavigate} />
+        {state.donationAlert && (
+          <div style={{ padding: '0 1rem' }}>
+            <Alert type="success" message={state.donationAlert} onClose={() => setState((s) => ({ ...s, donationAlert: null }))} />
+          </div>
         )}
+        {state.currentPage === 'dashboard' && state.user && (
+          <DashboardContent key={`dashboard-${state.dashboardRefresh}`} user={state.user} t={t} onNavigate={handleNavigate} />
+        )}
+
+        {/* Old dashboard UI replaced with component */}
+        {/* legacy dashboard removed */}
 
         {state.currentPage === 'explore' && (
           <ExplorePage locale={state.locale} userId={state.user.id} onActionSelect={handleActionSelect} />
@@ -243,17 +339,26 @@ export function App() {
             userId={state.user.id}
             selectedAction={state.selectedAction || undefined}
             onSuccess={() => {
-              setTimeout(() => handleNavigate('profile'), 500)
+              // Force dashboard and profile refresh so counts and lists update immediately when a donation is recorded.
+              setState((prev) => ({ ...prev, dashboardRefresh: (prev.dashboardRefresh || 0) + 1, profileRefresh: (prev.profileRefresh || 0) + 1 }))
+            }}
+            onBack={() => {
+              // Force dashboard and profile refresh and navigate home
+              setState((prev) => ({ ...prev, dashboardRefresh: (prev.dashboardRefresh || 0) + 1, profileRefresh: (prev.profileRefresh || 0) + 1 }))
+              handleNavigate('dashboard')
             }}
           />
         )}
 
         {state.currentPage === 'profile' && (
-          <ProfilePage
-            locale={state.locale}
-            user={state.user}
-            onUpdate={handleProfileUpdate}
-          />
+          <ErrorBoundary>
+            <ProfilePage
+              locale={state.locale}
+              user={state.user}
+              onUpdate={handleProfileUpdate}
+              refreshKey={state.profileRefresh}
+            />
+          </ErrorBoundary>
         )}
 
         {state.currentPage === 'participate' && (

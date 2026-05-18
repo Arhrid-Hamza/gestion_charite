@@ -127,8 +127,8 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
         })
     }, 0)
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [call, user?.id, user?.role, user?.email])
+    return () => window.clearTimeout(tid)
+  }, [call, onUpdate, user])
 
   /* ── Load donations ─────────────────────────────────────────── */
   useEffect(() => {

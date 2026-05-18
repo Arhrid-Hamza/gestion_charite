@@ -24,6 +24,7 @@ interface DonatePageProps {
   userId?: number
   selectedAction?: CharityAction
   onSuccess?: (donation: Donation) => void
+  onBack?: () => void
 }
 
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250]
@@ -36,6 +37,7 @@ export function DonatePage({
   userId,
   selectedAction,
   onSuccess,
+  onBack,
 }: DonatePageProps) {
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
@@ -48,7 +50,7 @@ export function DonatePage({
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState('')
   const [donated, setDonated] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'PAYPAL' | 'AUTOMATIC' | 'NO_PAYMENT'>('AUTOMATIC')
+  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'PAYPAL' | 'NO_PAYMENT'>('STRIPE')
 
   const parsedActionId = Number.parseInt(actionIdInput, 10)
   const isActionIdValid = Number.isInteger(parsedActionId) && parsedActionId > 0
@@ -62,7 +64,7 @@ export function DonatePage({
 
     async function finalizePayment() {
       try {
-        if (paymentState === 'paypal-success') {
+          if (paymentState === 'paypal-success') {
           const orderId = params.get('token')
           const rawPendingDonation = localStorage.getItem(PENDING_DONATION_KEY)
           if (!orderId || !rawPendingDonation) { setError('Paiement PayPal invalide ou expiré'); return }
@@ -71,7 +73,7 @@ export function DonatePage({
             method: 'POST', body: JSON.stringify(pendingDonation),
           })
           localStorage.removeItem(PENDING_DONATION_KEY)
-          setSuccess('Don PayPal confirmé avec succès!')
+          setSuccess('Votre don a été enregistré')
           setDonated(true)
           if (response.donation) onSuccess?.(response.donation)
           return
@@ -80,7 +82,7 @@ export function DonatePage({
           const sessionId = params.get('session_id')
           if (!sessionId) { setError('Session Stripe manquante'); return }
           const response = await call<ProviderResponse>(`/payments/stripe/confirm-session?sessionId=${encodeURIComponent(sessionId)}`, { method: 'POST' })
-          setSuccess('Don Stripe confirmé avec succès!')
+          setSuccess('Votre don a été enregistré')
           setDonated(true)
           if (response.donation) onSuccess?.(response.donation)
           return
@@ -137,27 +139,17 @@ export function DonatePage({
         return
       }
 
-      if (paymentMethod === 'AUTOMATIC') {
-        // Automatic payment: create a donation record and let backend handle scheduled/auto payments
-        const resp = await call<ProviderResponse>('/donations', {
-          method: 'POST', body: JSON.stringify({ ...paymentRequest, paymentMethod: 'AUTOMATIC' }),
-        })
-        setSuccess('Don programmé/automatique enregistré avec succès')
-        setDonated(true)
-        if (resp?.donation) onSuccess?.(resp.donation)
-        return
-      }
-
       // Fallback: quick-donate (no external provider)
       const resp = await call<ProviderResponse>('/donations', {
         method: 'POST',
         body: JSON.stringify(paymentRequest),
       })
 
-      setSuccess('Don effectué avec succès (sans paiement en ligne)')
+      setSuccess('Votre don a été enregistré')
       if (resp?.donation) {
         onSuccess?.(resp.donation)
       }
+      setDonated(true)
       return
     } catch {
       // error set by useApi
@@ -174,10 +166,22 @@ export function DonatePage({
               <path d="M12 20l6 6 10-12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 className="dp-success-title">{success || t.donate}</h2>
+          <h2 className="dp-success-title">{success || 'Don enregistré'}</h2>
           <p className="dp-success-sub">Merci pour votre générosité ✨</p>
-          <button className="dp-btn-primary" onClick={() => { setDonated(false); setSuccess(''); setStep('amount') }}>
-            Faire un autre don
+          <button
+            className="dp-btn-primary"
+            onClick={() => {
+              if (onBack) {
+                onBack()
+                return
+              }
+              // Fallback: reset donate flow
+              setDonated(false)
+              setSuccess('')
+              setStep('amount')
+            }}
+          >
+            Retour
           </button>
         </div>
       </div>
@@ -310,16 +314,6 @@ export function DonatePage({
                     <div className="dp-pay-sub">Carte bancaire</div>
                   </div>
                 </button>
-                <button
-                  className={`dp-pay-btn ${paymentMethod === 'AUTOMATIC' ? 'selected' : ''}`}
-                  onClick={() => setPaymentMethod('AUTOMATIC')}
-                >
-                  <span className="dp-pay-logo">A</span>
-                  <div>
-                    <div className="dp-pay-name">Automatique</div>
-                    <div className="dp-pay-sub">Paiement récurrent/programmé</div>
-                  </div>
-                </button>
               </div>
 
               <label className="dp-label dp-label-mt">{t.message}</label>
@@ -352,7 +346,7 @@ export function DonatePage({
                 </div>
                 <div className="dp-summary-row">
                   <span>Méthode</span>
-                  <span className="dp-summary-val">{paymentMethod === 'PAYPAL' ? 'PayPal' : paymentMethod === 'STRIPE' ? 'Stripe' : 'Automatique'}</span>
+                  <span className="dp-summary-val">{paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</span>
                 </div>
                 {message.trim() && (
                   <div className="dp-summary-row dp-summary-msg">
@@ -376,11 +370,11 @@ export function DonatePage({
                   : <>♥ {t.donate} ${parsedAmount.toFixed(2)}</>}
               </button>
 
-              <div className="dp-nav-row" style={{ marginTop: '0.75rem' }}>
+              <div className="dp-nav-row">
                 <button className="dp-btn-ghost" onClick={() => goTo('details')}>← Retour</button>
               </div>
 
-              <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : paymentMethod === 'STRIPE' ? 'Stripe' : 'Automatique'}</p>
+              <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</p>
             </div>
           )}
         </div>

@@ -1,15 +1,15 @@
-# Docker Setup for Gestion Charite - TODO
+# TODO - Correction Dashboard (0 actifs)
 
-## Plan Steps:
+## Étape 1 — Backend
+- [ ] Ajouter endpoint `GET /api/organizations/user/{userId}` dans `backend/src/main/java/com/devbuild/gestion_charite/controller/OrganizationController.java`
+  - Retourner la liste d’organisations liées au user (ex: `adminUserId == userId`).
 
-### [x] 1. Create .dockerignore
-### [x] 2. Create Dockerfile.backend
-### [x] 3. Create Dockerfile.frontend
-### [x] 4. Create docker-compose.yml
-### [ ] 5. Verify setup with `docker compose up --build`
-### [ ] 6. Update TODO.md with completion status
+## Étape 2 — Frontend
+- [ ] Mettre à jour `frontend/src/App.tsx` : afficher l’erreur au lieu de masquer via `catch(() => [])` sur le dashboard.
+  - Garder fallback `[]` mais afficher un message/alerte.
 
-**Access:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080
-- H2 Console: http://localhost:8080/h2-console
+## Étape 3 — Vérification
+- [ ] Relancer backend + frontend.
+- [ ] Vérifier que `0 actifs` devient correct pour un user lié à une organisation.
+- [ ] Vérifier que `Total donné` et `événements` remontent aussi.
+

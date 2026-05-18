@@ -1,11 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');
 
 /* ─── Page ─────────────────────────────────────────────── */
 .org-page {
   background: linear-gradient(135deg, rgba(33, 107, 104, 0.06), rgba(30, 79, 136, 0.06));
   min-height: calc(100vh - 80px);
   padding: 2.5rem 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Ensure consistent font in this page for all text/button elements */
+.org-page,
+.org-page * {
+  font-family: inherit;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -197,7 +203,7 @@
   border: 1.5px solid rgba(31, 60, 74, 0.12);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   background-color: rgba(255, 255, 255, 0.95);
-  font-family: 'DM Sans', sans-serif;
+  font-family: inherit;
   font-size: 0.9rem;
   color: #1f3c4a;
 }
@@ -225,7 +231,7 @@
   background: linear-gradient(135deg, #216b68, #4a9e9b);
   border: none;
   color: #fff;
-  font-family: 'DM Sans', sans-serif;
+  font-family: inherit;
   transition: all 0.3s ease;
   letter-spacing: 0.01em;
   position: relative;
@@ -445,7 +451,7 @@
   padding: 0.55rem 1.15rem;
   font-weight: 600;
   font-size: 0.82rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: inherit;
   transition: all 0.25s ease;
   white-space: nowrap;
   flex-shrink: 0;

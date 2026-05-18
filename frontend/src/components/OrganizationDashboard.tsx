@@ -255,16 +255,6 @@ export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboar
 
         {organization ? (
           <>
-            {/* Added button to view/jump to your organization page from dashboard */}
-            <div className="org-dashboard-top-actions">
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => onNavigate('organization')}
-              >
-                Leave organization
-              </button>
-            </div>
 
             <div className="org-metrics-grid">
 

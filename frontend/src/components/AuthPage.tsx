@@ -669,20 +669,23 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
     }
 
     try {
-      // /organizations/login returns Organization only (or 401 with { error: ... })
+      // backend: POST /api/organizations/login returns Organization (no wrapper)
       const org = await call<Organization>('/organizations/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       })
 
+
       setSuccess('Organization login successful!')
       const orgUser: User = {
+        // This backend model does not expose a separate admin user row.
+        // We'll keep the organization as the organizer profile and use a stable id.
         id: org.adminUserId ?? org.id,
-        fullName: org.name,
+        fullName: org.primaryContactName || org.name,
         email: org.primaryContactEmail,
         role: 'ORGANIZER',
         preferredLanguage: locale,
-        phone: org.primaryContactPhone,
+        phone: org.primaryContactPhone || '',
       }
       if (onOrgAuthSuccess) {
         onOrgAuthSuccess(orgUser)

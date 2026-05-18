@@ -75,6 +75,27 @@ export function Layout({
     }
   }, [menuOpen])
 
+  // Close menu when navigation changes (prevent backdrop from persisting)
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuOpen(false)
+    }
+    // Intentionally only run when currentPage changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage])
+
+  // Allow closing the mobile menu with Escape key
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && menuOpen) {
+        setMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [menuOpen])
+
   function NavBtn({
     page,
     label,
