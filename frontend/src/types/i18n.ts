@@ -236,6 +236,7 @@ export const I18N = {
     role: 'الدور',
     availableOrganizations: 'المنظمات المتاحة',
     joinOrganization: 'انضمام',
+    joinedOrganization: 'منظمة منضم إليها',
     allRightsReserved: 'جميع الحقوق محفوظة',
     status: 'الحالة',
     accountSettings: 'إعدادات الحساب',

@@ -124,7 +124,7 @@ function DashboardContent({ user, t, onNavigate }: { user: User, t: Record<strin
           💳 {t.donate}
         </button>
         <button className="btn-action" onClick={() => onNavigate('organization')}>
-          🏢 {t.createOrganization}
+          🏢 Voir organisations
         </button>
       </div>
     </div>

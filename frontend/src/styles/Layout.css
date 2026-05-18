@@ -208,6 +208,8 @@ body {
 .lang-selector select:hover { border-color: rgba(255,255,255,0.5); }
 .lang-selector select:focus {
   outline: none;
+  background: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
   border-color: rgba(255,255,255,0.7);
   box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
 }

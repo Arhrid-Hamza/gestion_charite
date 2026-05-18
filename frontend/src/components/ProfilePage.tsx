@@ -144,13 +144,13 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
   /* ── Save ───────────────────────────────────────────────────── */
   async function handleSave() {
     if (!user?.id) {
-      setError(t.userNotFound)
+      setError('Utilisateur non identifie')
       return
     }
 
     if (user.role === 'ORGANIZER') {
       if (!organizationProfile) {
-        setError(t.orgNotFound)
+        setError('Organisation introuvable pour ce compte')
         return
       }
       try {
@@ -192,7 +192,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
           address: payload.legalAddress ?? '',
           interests: payload.mission ?? '',
         })
-        setSuccess(t.orgUpdated)
+        setSuccess("Informations de l'organisation mises a jour avec succes !")
       } catch {
         /* error set by useApi */
       }
@@ -206,7 +206,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
         body: JSON.stringify({ fullName, phone, address, interests }),
       })
       setProfileUser(payload)
-      setSuccess(t.profileUpdated)
+      setSuccess('Profil mis a jour avec succes !')
       onUpdate?.(payload)
     } catch {
       /* error set by useApi */
@@ -237,7 +237,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
           </div>
 
           <p className="pp-sidebar-name">{displayName}</p>
-          <p className="pp-sidebar-role">{isOrganizer ? t.organizerRole : t.donorRole}</p>
+          <p className="pp-sidebar-role">{isOrganizer ? 'Organizer' : 'Donor'}</p>
           <p className="pp-sidebar-email">{displayEmail}</p>
 
           <div className="pp-sidebar-divider" />
@@ -246,13 +246,13 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
           {isOrganizer ? (
             <div className="pp-sidebar-stats">
               <div className="pp-stat-pill">
-                <span className="pp-stat-pill-label">{t.organization}</span>
+                <span className="pp-stat-pill-label">Organisation</span>
                 <span className="pp-stat-pill-val">
                   {organizationProfile?.name?.slice(0, 12) ?? '—'}
                 </span>
               </div>
               <div className="pp-stat-pill">
-                <span className="pp-stat-pill-label">{t.status}</span>
+                <span className="pp-stat-pill-label">Statut</span>
                 <span className="pp-stat-pill-val">
                   {organizationProfile?.status ?? '—'}
                 </span>
@@ -294,9 +294,9 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
 
           {/* Header */}
           <div className="pp-content-header">
-            <p className="pp-eyebrow">{t.accountSettings}</p>
+            <p className="pp-eyebrow">Account Settings</p>
             <h1>
-              {t.myProfile}
+              Mon <span>{t.profile}</span>
             </h1>
           </div>
 
@@ -304,7 +304,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
           <section className="pp-section">
             <div className="pp-section-head">
               <div className="pp-section-icon" aria-hidden="true">✎</div>
-              <span className="pp-section-title">{t.personalInfo}</span>
+              <span className="pp-section-title">Informations personnelles</span>
             </div>
 
             <div className="pp-section-body">
@@ -318,7 +318,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                     className="pp-input"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder={t.yourFullName}
+                    placeholder="Votre nom complet"
                   />
                 </div>
 
@@ -350,7 +350,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                 {/* Interests / Mission */}
                 <div className="pp-field">
                   <label htmlFor="pp-interests" className="pp-label">
-                    {isOrganizer ? t.mission : t.interests}
+                    {isOrganizer ? 'Mission' : t.interests}
                   </label>
                   <input
                     id="pp-interests"
@@ -358,7 +358,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                     className="pp-input"
                     value={interests}
                     onChange={(e) => setInterests(e.target.value)}
-                    placeholder={isOrganizer ? t.orgMission : t.interestsPlaceholder}
+                    placeholder={isOrganizer ? "Mission de l'organisation" : 'education, sante...'}
                   />
                 </div>
 
@@ -371,7 +371,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                     rows={2}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder={t.yourAddress}
+                    placeholder="Votre adresse..."
                   />
                 </div>
               </div>
@@ -381,7 +381,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
                 onClick={() => void handleSave()}
                 disabled={isLoading}
               >
-                {isLoading ? t.saving : t.save}
+                {isLoading ? 'Enregistrement...' : t.save}
               </button>
             </div>
           </section>
@@ -391,26 +391,26 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
             <section className="pp-section">
               <div className="pp-section-head">
                 <div className="pp-section-icon" aria-hidden="true">🏛</div>
-                <span className="pp-section-title">{t.organization}</span>
+                <span className="pp-section-title">Organisation</span>
               </div>
               <div className="pp-section-body">
                 <div className="pp-org-grid">
                   <div className="pp-org-item">
-                    <p className="pp-org-item-label">{t.orgName}</p>
+                    <p className="pp-org-item-label">Nom</p>
                     <p className="pp-org-item-val">{organizationProfile?.name ?? '—'}</p>
                   </div>
                   <div className="pp-org-item">
-                    <p className="pp-org-item-label">{t.status}</p>
+                    <p className="pp-org-item-label">Statut</p>
                     <p className="pp-org-item-val">{organizationProfile?.status ?? '—'}</p>
                   </div>
                   <div className="pp-org-item">
-                    <p className="pp-org-item-label">{t.taxId}</p>
+                    <p className="pp-org-item-label">Identifiant fiscal</p>
                     <p className="pp-org-item-val">
                       {organizationProfile?.taxIdentificationNumber ?? '—'}
                     </p>
                   </div>
                   <div className="pp-org-item">
-                    <p className="pp-org-item-label">{t.contactEmail}</p>
+                    <p className="pp-org-item-label">Email contact</p>
                     <p className="pp-org-item-val" style={{ fontSize: '0.82rem' }}>
                       {organizationProfile?.primaryContactEmail ?? displayEmail}
                     </p>
