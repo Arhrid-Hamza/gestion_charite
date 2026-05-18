@@ -175,7 +175,7 @@ export function DonatePage({
             </svg>
           </div>
           <h2 className="dp-success-title">{success || t.donate}</h2>
-          <p className="dp-success-sub">Merci pour votre générosité ✨</p>
+          <p className="dp-success-sub">{t.thanksForGenerosity}</p>
           <button className="dp-btn-primary" onClick={() => { setDonated(false); setSuccess(''); setStep('amount') }}>
             Faire un autre don
           </button>
@@ -198,7 +198,7 @@ export function DonatePage({
             <span>Faire un don</span>
           </div>
           <h1 className="dp-title">{t.donate}</h1>
-          <p className="dp-subtitle">Chaque contribution compte</p>
+          <p className="dp-subtitle">{t.everyContributionCounts}</p>
         </div>
 
         {/* Alerts */}
@@ -271,7 +271,7 @@ export function DonatePage({
               )}
 
               <div className="dp-amount-preview">
-                <span className="dp-preview-label">Votre don</span>
+                <span className="dp-preview-label">{t.yourDonation}</span>
                 <span className="dp-preview-amount">${isAmountValid ? parsedAmount.toFixed(2) : '0.00'}</span>
               </div>
 
@@ -280,7 +280,7 @@ export function DonatePage({
                 disabled={!isActionIdValid || !isAmountValid}
                 onClick={() => goTo('details')}
               >
-                Continuer →
+                {t.continue} →
               </button>
             </div>
           )}
@@ -297,7 +297,7 @@ export function DonatePage({
                   <span className="dp-pay-logo">P</span>
                   <div>
                     <div className="dp-pay-name">PayPal</div>
-                    <div className="dp-pay-sub">Paiement sécurisé</div>
+                    <div className="dp-pay-sub">{t.securePayment}</div>
                   </div>
                 </button>
                 <button
@@ -307,7 +307,7 @@ export function DonatePage({
                   <span className="dp-pay-logo dp-pay-logo-stripe">S</span>
                   <div>
                     <div className="dp-pay-name">Stripe</div>
-                    <div className="dp-pay-sub">Carte bancaire</div>
+                    <div className="dp-pay-sub">{t.creditCard}</div>
                   </div>
                 </button>
                 <button
@@ -316,8 +316,8 @@ export function DonatePage({
                 >
                   <span className="dp-pay-logo">A</span>
                   <div>
-                    <div className="dp-pay-name">Automatique</div>
-                    <div className="dp-pay-sub">Paiement récurrent/programmé</div>
+                    <div className="dp-pay-name">{t.automatic}</div>
+                    <div className="dp-pay-sub">{t.recurringPayment}</div>
                   </div>
                 </button>
               </div>
@@ -332,8 +332,8 @@ export function DonatePage({
               />
 
               <div className="dp-nav-row">
-                <button className="dp-btn-ghost" onClick={() => goTo('amount')}>← Retour</button>
-                <button className="dp-btn-primary" onClick={() => goTo('confirm')}>Continuer →</button>
+                <button className="dp-btn-ghost" onClick={() => goTo('amount')}>← {t.back}</button>
+                <button className="dp-btn-primary" onClick={() => goTo('confirm')}>{t.continue} →</button>
               </div>
             </div>
           )}
@@ -343,11 +343,11 @@ export function DonatePage({
             <div className="dp-section">
               <div className="dp-summary">
                 <div className="dp-summary-row">
-                  <span>Action caritative</span>
+                  <span>{t.charityAction}</span>
                   <span className="dp-summary-val">#{parsedActionId}</span>
                 </div>
                 <div className="dp-summary-row">
-                  <span>Montant</span>
+                  <span>{t.amount}</span>
                   <span className="dp-summary-val">${parsedAmount.toFixed(2)}</span>
                 </div>
                 <div className="dp-summary-row">
@@ -356,12 +356,12 @@ export function DonatePage({
                 </div>
                 {message.trim() && (
                   <div className="dp-summary-row dp-summary-msg">
-                    <span>Message</span>
+                    <span>{t.message}</span>
                     <span className="dp-summary-val">{message}</span>
                   </div>
                 )}
                 <div className="dp-summary-total">
-                  <span>Total</span>
+                  <span>{t.total}</span>
                   <span className="dp-total-amt">${parsedAmount.toFixed(2)}</span>
                 </div>
               </div>
@@ -377,7 +377,7 @@ export function DonatePage({
               </button>
 
               <div className="dp-nav-row" style={{ marginTop: '0.75rem' }}>
-                <button className="dp-btn-ghost" onClick={() => goTo('details')}>← Retour</button>
+                <button className="dp-btn-ghost" onClick={() => goTo('details')}>← {t.back}</button>
               </div>
 
               <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : paymentMethod === 'STRIPE' ? 'Stripe' : 'Automatique'}</p>

@@ -12,9 +12,9 @@ interface ParticipatePageProps {
 }
 
 const ROLES = [
-  { value: 'VOLUNTEER', label: 'Bénévole',    icon: '🤝', activeClass: 'active-volunteer' },
-  { value: 'ORGANIZER', label: 'Organisateur', icon: '📋', activeClass: 'active-organizer' },
-  { value: 'SUPPORTER', label: 'Supporteur',   icon: '💙', activeClass: 'active-supporter' },
+  { value: 'VOLUNTEER', activeClass: 'active-volunteer', icon: '🤝' },
+  { value: 'ORGANIZER', activeClass: 'active-organizer', icon: '📋' },
+  { value: 'SUPPORTER', activeClass: 'active-supporter', icon: '💙' },
 ]
 
 function getRoleBadgeClass(role: string) {
@@ -59,7 +59,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
 
   async function handleRegister() {
     if (!userId || !actionId) {
-      setError('Utilisateur ou action non défini')
+      setError(t.userOrActionNotDefined)
       setShakeField(true)
       setTimeout(() => setShakeField(false), 600)
       return
@@ -108,8 +108,8 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
 
         <div className="participate-header">
           <span className="page-eyebrow">🎗️ Charité</span>
-          <h1>S'engager & <em>participer</em></h1>
-          <p>Rejoignez une action caritative et faites la différence</p>
+          <h1>{t.engageAndParticipate}</h1>
+          <p>{t.joinActionAndMakeDifference}</p>
         </div>
 
         {/* ── Single unified card ── */}
@@ -140,7 +140,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                         className={`form-control${shakeField ? ' form-control--shake' : ''}`}
                         value={actionId || ''}
                         onChange={(e) => setActionId(parseInt(e.target.value) || 0)}
-                        placeholder="ID de l'action caritative"
+                        placeholder={t.charityActionIdPlaceholder}
                         min={1}
                       />
                     </div>
@@ -156,7 +156,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                             onClick={() => setRole(r.value)}
                           >
                             <span className="role-icon">{r.icon}</span>
-                            {r.label}
+                            {r.value === 'VOLUNTEER' ? t.volunteer : r.value === 'ORGANIZER' ? t.organizerRole : t.supporter}
                           </button>
                         ))}
                       </div>
@@ -206,7 +206,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                 <section className="participate-section">
                   <div className="history-topbar">
                     <button className="btn-back-pill" onClick={handleBack}>
-                      ‹ Retour
+                      ‹ {t.back}
                     </button>
                     <h3><span className="card-title-icon">📜</span>{t.myParticipations}</h3>
                   </div>
@@ -227,7 +227,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                           style={{ animationDelay: `${i * 0.07}s` }}
                         >
                           <div className="participation-info">
-                            <span className="participation-action">Action #{p.charityActionId}</span>
+                            <span className="participation-action">{t.actionNumber}{p.charityActionId}</span>
                             <span className={getRoleBadgeClass(p.roleInAction)}>{p.roleInAction}</span>
                           </div>
                           <small className="participation-date">{formatDate(p.createdAt)}</small>

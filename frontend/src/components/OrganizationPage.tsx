@@ -85,10 +85,7 @@ export function OrganizationPage({
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [joiningOrgId, setJoiningOrgId]   = useState<number | null>(null)
 
-  const typewriterText =
-    locale === 'fr'
-      ? 'Remplissez le formulaire pour soumettre votre organisation.'
-      : 'أكمل النموذج لتقديم منظمتك.'
+  const typewriterText = t.orgFormSubtitle
 
   const { displayed: twText, done: twDone } = useTypewriter(
     isOrganizer ? typewriterText : '',
@@ -107,7 +104,7 @@ export function OrganizationPage({
   }, [call, isOrganizer])
 
   async function handleCreateOrg() {
-    if (!userId) { setError('Utilisateur non identifié'); return }
+    if (!userId) { setError(t.userNotFound); return }
     setSuccess('')
     try {
       const payload = await call<Organization>('/organizations', {
@@ -124,14 +121,14 @@ export function OrganizationPage({
           status: 'PENDING',
         }),
       })
-      setSuccess("Organisation créée et en attente d'approbation")
+      setSuccess(t.orgCreatedPending)
       setName(''); setMission(''); setPassword('')
       onOrgCreated?.(payload)
     } catch { /* error already set */ }
   }
 
   async function handleJoinOrganization(org: Organization) {
-    if (!userId) { setError('Utilisateur non identifié'); return }
+    if (!userId) { setError(t.userNotFound); return }
     setSuccess('')
     setJoiningOrgId(org.id)
     try {
@@ -170,25 +167,25 @@ export function OrganizationPage({
                     <label htmlFor="org-name" className="form-label">{t.name} *</label>
                     <input id="org-name" type="text" className="form-control"
                       value={name} onChange={(e) => setName(e.target.value)}
-                      placeholder="Ex: Association Espoir" required />
+                      placeholder={t.orgNamePlaceholder} required />
                   </div>
 
                   <div className="mb-3 form-animate-item" style={{ animationDelay: '0.2s' }}>
                     <label htmlFor="org-password" className="form-label">
-                      Mot de passe de l'organisation *
+                      {t.orgPassword} *
                     </label>
                     <input id="org-password" type="password" className="form-control"
                       placeholder="••••••••" value={password}
                       onChange={(e) => setPassword(e.target.value)} required />
                     <div className="form-text">
-                      Ce mot de passe sera utilisé pour se connecter en tant qu'organisation.
+                      {t.orgPasswordHint}
                     </div>
                   </div>
 
                   <div className="mb-3 form-animate-item" style={{ animationDelay: '0.3s' }}>
                     <label htmlFor="mission" className="form-label">{t.mission}</label>
                     <textarea id="mission" className="form-control" rows={3}
-                      value={mission} placeholder="Décrivez la mission de votre organisation…"
+                      value={mission} placeholder={t.orgMissionPlaceholder}
                       onChange={(e) => setMission(e.target.value)} />
                   </div>
 
@@ -257,9 +254,7 @@ export function OrganizationPage({
                 <div className="card-body">
                   <h2>{t.organization}</h2>
                   <p className="card-subtitle">
-                    {locale === 'fr'
-                      ? 'Choisissez une organisation active à rejoindre.'
-                      : 'اختر منظمة نشطة للانضمام إليها.'}
+                    {t.chooseOrgToJoin}
                   </p>
 
                   {currentUser?.joinedOrganizationName ? (
@@ -272,15 +267,15 @@ export function OrganizationPage({
                       <div className="org-info-row">
                         <div className="org-info-icon">🏢</div>
                         <div>
-                          <div className="org-info-label">Organisation actuelle</div>
+                          <div className="org-info-label">{t.currentOrg}</div>
                           <div className="org-info-value">{currentUser.joinedOrganizationName}</div>
                         </div>
                       </div>
                       <div className="org-info-row">
                         <div className="org-info-icon">✅</div>
                         <div>
-                          <div className="org-info-label">Statut</div>
-                          <div className="org-info-value">Membre actif</div>
+                          <div className="org-info-label">{t.status}</div>
+                          <div className="org-info-value">{t.activeMember}</div>
                         </div>
                       </div>
                     </>
@@ -298,34 +293,33 @@ export function OrganizationPage({
 
               <div className="card org-info-card">
                 <div className="card-body">
-                  <h2>Votre profil</h2>
-                  <p className="card-subtitle">Informations de votre compte organisateur.</p>
+                  <h2>{t.yourProfile}</h2>
+                  <p className="card-subtitle">{t.orgAccountInfo}</p>
 
                   <div className="org-info-row">
                     <div className="org-info-icon">👤</div>
                     <div>
-                      <div className="org-info-label">Rôle</div>
-                      <div className="org-info-value">Organisateur</div>
+                      <div className="org-info-label">{t.role}</div>
+                      <div className="org-info-value">{t.organizerRole}</div>
                     </div>
                   </div>
                   <div className="org-info-row">
                     <div className="org-info-icon">📋</div>
                     <div>
-                      <div className="org-info-label">Statut</div>
-                      <div className="org-info-value">Aucune organisation créée</div>
+                      <div className="org-info-label">{t.status}</div>
+                      <div className="org-info-value">{t.noOrgCreated}</div>
                     </div>
                   </div>
                   <div className="org-info-row">
                     <div className="org-info-icon">⏳</div>
                     <div>
-                      <div className="org-info-label">Après soumission</div>
-                      <div className="org-info-value">En attente d'approbation</div>
+                      <div className="org-info-label">{t.afterSubmission}</div>
+                      <div className="org-info-value">{t.pendingApproval}</div>
                     </div>
                   </div>
 
                   <div className="org-hint-box">
-                    💡 Votre organisation sera visible par les bénévoles une fois approuvée
-                    par l'administrateur.
+                    {t.orgVisibilityHint}
                   </div>
                 </div>
               </div>
