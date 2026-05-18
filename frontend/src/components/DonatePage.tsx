@@ -1,12 +1,11 @@
 import { useApi } from '../hooks/useApi'
 import { I18N } from '../types/i18n'
 import { Alert } from './Header'
-import type { Locale, CharityAction, Donation, PaymentMethod } from '../types'
+import type { Locale, CharityAction, Donation } from '../types'
 import '../styles/DonatePage.css'
 import { useEffect, useState } from 'react'
 
 const PENDING_DONATION_KEY = 'pendingDonationPayment'
-const PAYPAL_CLIENT_ID = String(import.meta.env.VITE_PAYPAL_CLIENT_ID ?? '').trim()
 
 interface PaymentRequest {
   actionId: number
@@ -46,9 +45,9 @@ export function DonatePage({
   const [amount, setAmount] = useState('50')
   const [customAmount, setCustomAmount] = useState(false)
   const [message, setMessage] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PAYPAL')
   const [success, setSuccess] = useState('')
   const [donated, setDonated] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'PAYPAL' | 'NO_PAYMENT'>('PAYPAL')
 
   const parsedActionId = Number.parseInt(actionIdInput, 10)
   const isActionIdValid = Number.isInteger(parsedActionId) && parsedActionId > 0
@@ -115,19 +114,38 @@ export function DonatePage({
         amount: parsedAmount,
         message,
       }
+
+      // Prefer redirecting to payment providers when selected
       if (paymentMethod === 'PAYPAL') {
+        const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
         if (!PAYPAL_CLIENT_ID) { setError('PayPal is not configured. Set VITE_PAYPAL_CLIENT_ID in frontend/.env'); return }
         localStorage.setItem(PENDING_DONATION_KEY, JSON.stringify(paymentRequest))
-        const response = await call<{ approveUrl: string }>('/payments/paypal/create-order', {
+        const resp = await call<{ approveUrl: string }>('/payments/paypal/create-order', {
           method: 'POST', body: JSON.stringify(paymentRequest),
         })
-        window.location.href = response.approveUrl
+        window.location.href = resp.approveUrl
         return
       }
-      const response = await call<{ checkoutUrl: string }>('/payments/stripe/create-checkout-session', {
-        method: 'POST', body: JSON.stringify(paymentRequest),
+
+      if (paymentMethod === 'STRIPE') {
+        const resp = await call<{ checkoutUrl: string }>('/payments/stripe/create-checkout-session', {
+          method: 'POST', body: JSON.stringify(paymentRequest),
+        })
+        window.location.href = resp.checkoutUrl
+        return
+      }
+
+      // Fallback: quick-donate (no external provider)
+      const resp = await call<ProviderResponse>('/donations', {
+        method: 'POST',
+        body: JSON.stringify(paymentRequest),
       })
-      window.location.href = response.checkoutUrl
+
+      setSuccess('Don effectué avec succès (sans paiement en ligne)')
+      if (resp?.donation) {
+        onSuccess?.(resp.donation)
+      }
+      return
     } catch {
       // error set by useApi
     }
@@ -205,6 +223,7 @@ export function DonatePage({
                 />
               </div>
 
+<<<<<<< Updated upstream
               <label className="dp-label dp-label-mt">{t.amount}</label>
               <div className="dp-presets">
                 {PRESET_AMOUNTS.map(a => (
@@ -243,6 +262,34 @@ export function DonatePage({
                 <span className="dp-preview-label">Votre don</span>
                 <span className="dp-preview-amount">${isAmountValid ? parsedAmount.toFixed(2) : '0.00'}</span>
               </div>
+=======
+              <div className="mb-3">
+                <label htmlFor="amount" className="form-label">{t.amount}</label>
+                <input
+                  id="amount"
+                  type="number"
+                  className="form-control"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  min="1"
+                  step="10"
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="message" className="form-label">{t.message}</label>
+                <textarea
+                  id="message"
+                  className="form-control"
+                  rows={4}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder={t.messageOptional}
+                />
+              </div>
+
+>>>>>>> Stashed changes
 
               <button
                 className="dp-btn-primary dp-btn-full"

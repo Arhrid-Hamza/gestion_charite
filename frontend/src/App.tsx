@@ -212,6 +212,7 @@ export function App() {
             locale={state.locale}
             userId={state.user.id}
             selectedAction={state.selectedAction || undefined}
+            onSuccess={() => handleNavigate('profile')}
           />
         )}
 

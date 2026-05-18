@@ -1,5 +1,5 @@
 export type Role = 'ADMIN' | 'ORGANIZER' | 'DONOR' | 'SUPER_ADMIN'
-export type PaymentMethod = 'STRIPE' | 'PAYPAL'
+export type PaymentMethod = 'STRIPE' | 'PAYPAL' | 'NO_PAYMENT'
 export type Locale = 'fr' | 'ar'
 export type OrganizationStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED'
 export type ActionStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'ACTIVE' | 'ARCHIVED'

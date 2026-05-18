@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 import { useState } from 'react'
 import type { Locale, User } from '../types'
 import { I18N } from '../types/i18n'
