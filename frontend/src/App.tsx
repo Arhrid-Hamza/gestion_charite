@@ -11,11 +11,12 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { ParticipatePage } from './components/ParticipatePage'
 import { OrganizationPage } from './components/OrganizationPage'
 import { OrganizationDashboard } from './components/OrganizationDashboard'
+import { OrganizationActionDetailsPage } from './components/OrganizationActionDetailsPage'
 import { AdminPage } from './components/AdminPage'
 import { useApi } from './hooks/useApi'
 import './App.css'
 
-type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
+type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard' | 'org-action-details'
 
 interface DashboardState {
   user: User | null
@@ -231,7 +232,7 @@ export function App() {
     setState((prev) => ({ ...prev, locale }))
   }
 
-  function handleNavigate(page: PageType) {
+  function handleNavigate(page: PageType, action?: CharityAction) {
     setState((prev) => {
       if (!prev.user && page !== 'auth') {
         return { ...prev, currentPage: 'auth', selectedAction: null, selectedOrg: null };
@@ -242,7 +243,12 @@ export function App() {
         resolvedPage = 'org-dashboard'
       }
 
-      return { ...prev, currentPage: resolvedPage, selectedAction: null, selectedOrg: null }
+      return {
+        ...prev,
+        currentPage: resolvedPage,
+        selectedAction: action ?? null,
+        selectedOrg: null,
+      }
     })
   }
 
@@ -370,6 +376,16 @@ export function App() {
             locale={state.locale} 
             user={state.user} 
             onNavigate={handleNavigate}
+            selectedAction={state.selectedAction || undefined}
+          />
+        )}
+
+        {state.currentPage === 'org-action-details' && state.user.role === 'ORGANIZER' && state.selectedAction && (
+          <OrganizationActionDetailsPage
+            locale={state.locale}
+            action={state.selectedAction}
+            onBack={() => handleNavigate('org-dashboard')}
+            onEdit={(action) => handleNavigate('org-dashboard', action)}
           />
         )}
 

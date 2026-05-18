@@ -76,7 +76,13 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
     try {
       const payload = await call<Participation>('/participations', {
         method: 'POST',
-        body: JSON.stringify({ charityActionId: actionId, participantUserId: userId, roleInAction: role }),
+        body: JSON.stringify({
+          // Keep both keys for backend compatibility; current backend requires actionId.
+          actionId,
+          charityActionId: actionId,
+          participantUserId: userId,
+          roleInAction: role,
+        }),
       })
       onSuccess?.(payload)
       await call<Participation[]>(`/participations/user/${userId}`).then(setParticipations)
@@ -227,7 +233,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                           style={{ animationDelay: `${i * 0.07}s` }}
                         >
                           <div className="participation-info">
-                            <span className="participation-action">{t.actionNumber}{p.charityActionId}</span>
+                            <span className="participation-action">{t.actionNumber}{p.actionId ?? p.charityActionId}</span>
                             <span className={getRoleBadgeClass(p.roleInAction)}>{p.roleInAction}</span>
                           </div>
                           <small className="participation-date">{formatDate(p.createdAt)}</small>

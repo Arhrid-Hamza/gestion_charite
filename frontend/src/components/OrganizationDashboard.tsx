@@ -6,12 +6,13 @@ import { Alert } from './Header'
 import { I18N } from '../types/i18n'
 import '../styles/OrganizationDashboard.css'
 
-type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
+type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard' | 'org-action-details'
 
 interface OrganizationDashboardProps {
   locale: Locale
   user: User
   onNavigate: (page: PageType, action?: CharityAction) => void
+  selectedAction?: CharityAction
 }
 
 interface ActionFormState {
@@ -54,7 +55,28 @@ function normalizeMediaUrls(value: string) {
     .join(',')
 }
 
-export function OrganizationDashboard({ locale, user, onNavigate }: OrganizationDashboardProps) {
+function toDateInputValue(value?: string) {
+  if (!value) return ''
+  return value.includes('T') ? value.slice(0, 10) : value
+}
+
+function toActionFormState(action: CharityAction): ActionFormState {
+  return {
+    id: action.id,
+    title: action.title || '',
+    description: action.description || '',
+    targetAmount: String(action.targetAmount ?? ''),
+    categoryName: action.categoryName || '',
+    location: action.location || '',
+    startDate: toDateInputValue(action.startDate),
+    endDate: toDateInputValue(action.endDate),
+    mediaUrls: toMediaString(action.mediaUrls),
+    status: action.status,
+    collectedAmount: Number(action.collectedAmount || 0),
+  }
+}
+
+export function OrganizationDashboard({ locale, user, onNavigate, selectedAction }: OrganizationDashboardProps) {
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
 
@@ -77,25 +99,39 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
     setActionFormOpen(false)
   }
 
+  async function refreshOrgAndActions() {
+    const orgs = await call<Organization[]>('/organizations')
+
+    // Find organization by admin user ID, then fallback to email match
+    const userOrg =
+      orgs.find((org) => org.adminUserId === user.id) ??
+      orgs.find(
+        (org) =>
+          org.primaryContactEmail?.toLowerCase() === user.email?.toLowerCase(),
+      )
+
+    if (!userOrg) {
+      setOrganization(null)
+      setFormData({})
+      setActions([])
+      return
+    }
+
+    setOrganization(userOrg)
+    setFormData(userOrg)
+
+    const orgActions = await call<CharityAction[]>(
+      `/charity-actions?organizationId=${userOrg.id}`,
+    )
+    setActions(orgActions)
+  }
+
   // Load organization data
   useEffect(() => {
     const loadOrgData = async () => {
       try {
         setLoadingOrg(true)
-        const orgs = await call<Organization[]>('/organizations')
-        
-        // Find organization by admin user ID
-        const userOrg = orgs.find((org) => org.adminUserId === user.id)
-          ?? orgs.find((org) => org.primaryContactEmail?.toLowerCase() === user.email?.toLowerCase())
-        
-        if (userOrg) {
-          setOrganization(userOrg)
-          setFormData(userOrg)
-
-          // Load charity actions for this organization
-          const orgActions = await call<CharityAction[]>(`/charity-actions?organizationId=${userOrg.id}`)
-          setActions(orgActions)
-        }
+        await refreshOrgAndActions()
       } catch (err) {
         console.error('Failed to load organization data:', err)
       } finally {
@@ -104,7 +140,9 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
     }
 
     void loadOrgData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [call, user.id, user.email])
+
 
   const handleSaveOrganization = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,6 +165,10 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
       setFormData(payload)
       setSuccess('Organization updated successfully!')
       setEditMode(false)
+
+      // refresh view so metrics/lists are always consistent after modifications
+      void refreshOrgAndActions()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save organization')
     }
@@ -137,25 +179,34 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
     setActionFormOpen(true)
   }
 
-  const handleEditAction = (action: CharityAction) => {
-    setActionForm({
-      id: action.id,
-      title: action.title || '',
-      description: action.description || '',
-      targetAmount: String(action.targetAmount ?? ''),
-      categoryName: action.categoryName || '',
-      location: action.location || '',
-      startDate: action.startDate || '',
-      endDate: action.endDate || '',
-      mediaUrls: toMediaString(action.mediaUrls),
-      status: action.status,
-      collectedAmount: Number(action.collectedAmount || 0),
-    })
+  const handleEditAction = async (action: CharityAction) => {
+    // Open immediately with local values for instant feedback.
+    setActionForm(toActionFormState(action))
     setActionFormOpen(true)
+
+    // Then refresh with latest API values when available.
+    try {
+      const fresh = await call<CharityAction>(`/charity-actions/${action.id}`)
+      setActionForm(toActionFormState(fresh))
+    } catch {}
+  }
+
+  const handleStartOrganizationEdit = async () => {
+    if (!organization) return
+
+    // Open immediately with currently loaded values.
+    setFormData(organization)
+    setEditMode(true)
+
+    try {
+      const fresh = await call<Organization>(`/organizations/${organization.id}`)
+      setOrganization(fresh)
+      setFormData(fresh)
+    } catch {}
   }
 
   const handleViewAction = (action: CharityAction) => {
-    onNavigate('donate', action)
+    onNavigate('org-action-details', action)
   }
 
   const handleSaveAction = async (e: React.FormEvent) => {
@@ -211,10 +262,14 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
       }
 
       resetActionForm()
+
+      // refresh view so metrics/lists are always consistent after modifications
+      void refreshOrgAndActions()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save charity action')
     }
   }
+
 
   const handleArchiveAction = async (actionId: number) => {
     setSuccess('')
@@ -224,10 +279,28 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
       })
       setActions((prev) => prev.map((item) => (item.id === archived.id ? archived : item)))
       setSuccess('Charity action archived successfully')
+
+      // refresh view so metrics/lists are always consistent after modifications
+      void refreshOrgAndActions()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to archive charity action')
     }
+
   }
+
+  useEffect(() => {
+    if (!selectedAction) return
+    // selectedAction is a navigation payload: open edit form whenever it changes.
+    void (async () => {
+      try {
+        await handleEditAction(selectedAction)
+      } catch {
+        // ignore
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAction?.id])
+
 
   if (loadingOrg) {
     return (
@@ -298,8 +371,10 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
                   onClick={() => {
                     if (editMode) {
                       setFormData(organization)
+                      setEditMode(false)
+                      return
                     }
-                    setEditMode(!editMode)
+                    void handleStartOrganizationEdit()
                   }}
                 >
                   {editMode ? t.cancel : t.edit}
@@ -626,7 +701,7 @@ export function OrganizationDashboard({ locale, user, onNavigate }: Organization
                         </button>
                         <button 
                           className="btn btn-secondary btn-sm"
-                          onClick={() => handleEditAction(action)}
+                          onClick={() => void handleEditAction(action)}
                         >
                           {t.edit}
                         </button>

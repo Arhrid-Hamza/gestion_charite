@@ -24,6 +24,7 @@ type PageType =
   | 'organization'
   | 'admin'
   | 'org-dashboard'
+  | 'org-action-details'
 
 /** Nav icon mapping per page */
 const NAV_ICONS: Record<string, string> = {

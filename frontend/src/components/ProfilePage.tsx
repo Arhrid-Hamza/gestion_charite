@@ -8,6 +8,7 @@ interface ProfilePageProps {
   locale: Locale
   user?: User
   onUpdate?: (user: User) => void
+  refreshKey?: number
 }
 
 /* ── Alert ──────────────────────────────────────────────────── */
@@ -45,7 +46,7 @@ function initials(name?: string, email?: string): string {
 }
 
 /* ── Component ──────────────────────────────────────────────── */
-export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
+export function ProfilePage({ locale, user, onUpdate, refreshKey }: ProfilePageProps) {
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
 
@@ -127,8 +128,8 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
         })
     }, 0)
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [call, user?.id, user?.role, user?.email])
+    return () => window.clearTimeout(tid)
+  }, [call, onUpdate, user, refreshKey])
 
   /* ── Load donations ─────────────────────────────────────────── */
   useEffect(() => {
@@ -139,7 +140,7 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
         .catch(() => setDonations([]))
     }, 0)
     return () => window.clearTimeout(tid)
-  }, [call, user?.id, user?.role])
+  }, [call, user?.id, user?.role, refreshKey])
 
   /* ── Save ───────────────────────────────────────────────────── */
   async function handleSave() {
