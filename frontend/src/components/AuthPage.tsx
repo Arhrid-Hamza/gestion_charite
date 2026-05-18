@@ -158,6 +158,31 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
     event.preventDefault()
     setSuccess('')
 
+    // Admin → POST direct vers backend Spring Boot (port 8080)
+    if (email.toLowerCase() === 'admin@gestion-charite.local') {
+      const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api')
+          .trim().replace(/\/api$/i, '').replace('8080', '8081')
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = `${backendBase}/admin/login`
+
+      const emailInput = document.createElement('input')
+      emailInput.type = 'hidden'
+      emailInput.name = 'email'
+      emailInput.value = email
+
+      const passwordInput = document.createElement('input')
+      passwordInput.type = 'hidden'
+      passwordInput.name = 'password'
+      passwordInput.value = password
+
+      form.appendChild(emailInput)
+      form.appendChild(passwordInput)
+      document.body.appendChild(form)
+      form.submit()
+      return
+    }
+
     try {
       await call<{ userId: number }>(`/auth/login`, {
         method: 'POST',
