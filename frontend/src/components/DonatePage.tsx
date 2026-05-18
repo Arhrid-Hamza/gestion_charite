@@ -47,7 +47,7 @@ export function DonatePage({
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState('')
   const [donated, setDonated] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'PAYPAL' | 'NO_PAYMENT'>('PAYPAL')
+  const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'PAYPAL' | 'AUTOMATIC' | 'NO_PAYMENT'>('AUTOMATIC')
 
   const parsedActionId = Number.parseInt(actionIdInput, 10)
   const isActionIdValid = Number.isInteger(parsedActionId) && parsedActionId > 0
@@ -132,6 +132,17 @@ export function DonatePage({
           method: 'POST', body: JSON.stringify(paymentRequest),
         })
         window.location.href = resp.checkoutUrl
+        return
+      }
+
+      if (paymentMethod === 'AUTOMATIC') {
+        // Automatic payment: create a donation record and let backend handle scheduled/auto payments
+        const resp = await call<ProviderResponse>('/donations', {
+          method: 'POST', body: JSON.stringify({ ...paymentRequest, paymentMethod: 'AUTOMATIC' }),
+        })
+        setSuccess('Don programmé/automatique enregistré avec succès')
+        setDonated(true)
+        if (resp?.donation) onSuccess?.(resp.donation)
         return
       }
 
@@ -222,8 +233,7 @@ export function DonatePage({
                   placeholder="ID de l'action"
                 />
               </div>
-
-<<<<<<< Updated upstream
+ 
               <label className="dp-label dp-label-mt">{t.amount}</label>
               <div className="dp-presets">
                 {PRESET_AMOUNTS.map(a => (
@@ -262,34 +272,6 @@ export function DonatePage({
                 <span className="dp-preview-label">Votre don</span>
                 <span className="dp-preview-amount">${isAmountValid ? parsedAmount.toFixed(2) : '0.00'}</span>
               </div>
-=======
-              <div className="mb-3">
-                <label htmlFor="amount" className="form-label">{t.amount}</label>
-                <input
-                  id="amount"
-                  type="number"
-                  className="form-control"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="1"
-                  step="10"
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="message" className="form-label">{t.message}</label>
-                <textarea
-                  id="message"
-                  className="form-control"
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={t.messageOptional}
-                />
-              </div>
-
->>>>>>> Stashed changes
 
               <button
                 className="dp-btn-primary dp-btn-full"
@@ -326,6 +308,16 @@ export function DonatePage({
                     <div className="dp-pay-sub">Carte bancaire</div>
                   </div>
                 </button>
+                <button
+                  className={`dp-pay-btn ${paymentMethod === 'AUTOMATIC' ? 'selected' : ''}`}
+                  onClick={() => setPaymentMethod('AUTOMATIC')}
+                >
+                  <span className="dp-pay-logo">A</span>
+                  <div>
+                    <div className="dp-pay-name">Automatique</div>
+                    <div className="dp-pay-sub">Paiement récurrent/programmé</div>
+                  </div>
+                </button>
               </div>
 
               <label className="dp-label dp-label-mt">{t.message}</label>
@@ -358,7 +350,7 @@ export function DonatePage({
                 </div>
                 <div className="dp-summary-row">
                   <span>Méthode</span>
-                  <span className="dp-summary-val">{paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</span>
+                  <span className="dp-summary-val">{paymentMethod === 'PAYPAL' ? 'PayPal' : paymentMethod === 'STRIPE' ? 'Stripe' : 'Automatique'}</span>
                 </div>
                 {message.trim() && (
                   <div className="dp-summary-row dp-summary-msg">
@@ -386,7 +378,7 @@ export function DonatePage({
                 <button className="dp-btn-ghost" onClick={() => goTo('details')}>← Retour</button>
               </div>
 
-              <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : 'Stripe'}</p>
+              <p className="dp-secure-note">🔒 Paiement 100% sécurisé via {paymentMethod === 'PAYPAL' ? 'PayPal' : paymentMethod === 'STRIPE' ? 'Stripe' : 'Automatique'}</p>
             </div>
           )}
         </div>
