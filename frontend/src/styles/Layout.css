@@ -248,7 +248,9 @@ body {
 
 /* ── PAGE BODY ──────────────────────────── */
 
-.layout-container { flex: 1; padding: 2rem 0; }
+.layout-container { flex: 1; padding: 7rem 0 2.5rem; }
+
+
 
 /* ── FOOTER ─────────────────────────────── */
 

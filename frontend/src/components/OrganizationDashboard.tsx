@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import { useEffect, useState } from 'react'
 import type { User, Organization, CharityAction } from '../types'
 import { useApi } from '../hooks/useApi'

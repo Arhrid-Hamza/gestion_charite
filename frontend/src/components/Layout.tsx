@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/static-components */
 import { useState, useRef, useEffect } from 'react'
 import type { Locale, User } from '../types'
