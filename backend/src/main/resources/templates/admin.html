@@ -14,7 +14,6 @@
             min-height: 100vh;
         }
 
-        /* ── Navbar ── */
         .navbar-custom {
             background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
@@ -33,10 +32,7 @@
 
         .brand-button:hover { color: #e8f4f8; }
 
-        /* ── Page wrapper ── */
-        .page-wrapper {
-            padding: 30px 0 60px;
-        }
+        .page-wrapper { padding: 30px 0 60px; }
 
         .section-title {
             font-size: 1.4rem;
@@ -59,12 +55,21 @@
             transition: transform 0.25s, box-shadow 0.25s;
             background: white;
             height: 100%;
+            text-decoration: none;
+            color: inherit;
         }
 
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            color: inherit;
         }
+
+        .stat-card.clickable { cursor: pointer; border: 2px solid transparent; }
+
+        .stat-card.clickable:hover { border-color: #3498db; }
+
+        html { scroll-behavior: smooth; }
 
         .stat-icon {
             font-size: 2.2rem;
@@ -100,7 +105,16 @@
             font-weight: 500;
         }
 
-        /* ── Organisation approval cards ── */
+        .stat-arrow {
+            font-size: 1.2rem;
+            color: #3498db;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .stat-card.clickable:hover .stat-arrow { opacity: 1; }
+
+        /* ── Org approval cards ── */
         .org-approval-card {
             border: none;
             border-left: 5px solid #667eea;
@@ -125,7 +139,6 @@
         }
 
         .org-header h5 { color: #2c3e50; font-weight: 700; margin: 0; font-size: 1.2rem; }
-
         .org-mission { color: #7f8c8d; font-size: 0.88rem; margin-top: 4px; }
 
         .badge-pending {
@@ -212,10 +225,7 @@
             transition: all 0.2s;
         }
 
-        .logout-btn:hover {
-            background: #e74c3c;
-            color: white;
-        }
+        .logout-btn:hover { background: #e74c3c; color: white; }
 
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-8px); }
@@ -257,90 +267,106 @@
     <h3 class="section-title">📊 Vue d'ensemble</h3>
     <div class="row g-3 mb-4">
 
+        <!-- CLICKABLE: Utilisateurs → /admin/users -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/users" class="stat-card clickable d-flex">
                 <div class="stat-icon blue">👥</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalUsers}">0</div>
                     <div class="stat-label">Utilisateurs inscrits</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Organisations → /admin/organizations -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/organizations" class="stat-card clickable d-flex">
                 <div class="stat-icon green">🏢</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalOrgs}">0</div>
                     <div class="stat-label">Organisations au total</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Orgs approuvées → /admin/organizations?status=APPROVED -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/organizations?status=APPROVED" class="stat-card clickable d-flex">
                 <div class="stat-icon teal">✅</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${approvedOrgs}">0</div>
                     <div class="stat-label">Organisations approuvées</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: En attente → scroll vers section approbation -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="#pending-section" class="stat-card clickable d-flex">
                 <div class="stat-icon orange">⏳</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${pendingOrgsCount}">0</div>
                     <div class="stat-label">En attente d'approbation</div>
                 </div>
-            </div>
+                <span class="stat-arrow">↓</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Actions → /admin/actions -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/actions" class="stat-card clickable d-flex">
                 <div class="stat-icon purple">🎯</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalActions}">0</div>
                     <div class="stat-label">Actions caritatives</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Participants → /admin/participations -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/participations" class="stat-card clickable d-flex">
                 <div class="stat-icon blue">🤝</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalParticipants}">0</div>
                     <div class="stat-label">Participants inscrits</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Dons → /admin/donations -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/donations" class="stat-card clickable d-flex">
                 <div class="stat-icon green">💳</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalDonationsCount}">0</div>
                     <div class="stat-label">Dons effectués</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
+        <!-- CLICKABLE: Montant → /admin/donations -->
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="stat-card">
+            <a href="/admin/donations" class="stat-card clickable d-flex">
                 <div class="stat-icon red">💰</div>
                 <div class="stat-info">
                     <div class="stat-value" th:text="${totalDonationsAmount} + ' MAD'">0 MAD</div>
                     <div class="stat-label">Montant total des dons</div>
                 </div>
-            </div>
+                <span class="stat-arrow">›</span>
+            </a>
         </div>
 
     </div>
 
     <!-- ── Organisations en attente ── -->
-    <h3 class="section-title">📋 Organisations en attente d'approbation</h3>
+    <h3 class="section-title" id="pending-section">📋 Organisations en attente d'approbation</h3>
 
     <div th:if="${organizations.isEmpty()}" class="no-pending">
         <p>✅ Aucune organisation en attente pour le moment.</p>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilisateurs – Admin Gestion Charité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            padding: 1rem 0;
+        }
+
+        .brand-button {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .page-wrapper { padding: 30px 0 60px; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .page-header h2 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .back-btn {
+            background: rgba(44,62,80,0.08);
+            border: 1.5px solid #2c3e50;
+            color: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover { background: #2c3e50; color: white; }
+
+        /* ── Search bar ── */
+        .search-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 14px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            flex: 1;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar input:focus { border-color: #3498db; }
+
+        .search-bar select {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            outline: none;
+            background: white;
+        }
+
+        /* ── User table card ── */
+        .users-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table thead {
+            background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+
+        .users-table thead th {
+            padding: 14px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .users-table tbody tr {
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .users-table tbody tr:hover { background: #f8faff; }
+        .users-table tbody tr:last-child { border-bottom: none; }
+
+        .users-table tbody td {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            color: #444;
+            vertical-align: middle;
+        }
+
+        /* ── Avatar ── */
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .av-blue   { background: #E6F1FB; color: #0C447C; }
+        .av-teal   { background: #E1F5EE; color: #085041; }
+        .av-coral  { background: #FAECE7; color: #712B13; }
+        .av-purple { background: #EEEDFE; color: #3C3489; }
+        .av-amber  { background: #FAEEDA; color: #633806; }
+
+        .user-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-name-text { font-weight: 600; color: #2c3e50; }
+        .user-email-text { font-size: 0.8rem; color: #7f8c8d; margin-top: 2px; }
+
+        /* ── Role badges ── */
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .role-DONOR        { background: #E6F1FB; color: #0C447C; }
+        .role-ORGANIZATION { background: #E1F5EE; color: #085041; }
+        .role-ADMIN        { background: #EEEDFE; color: #3C3489; }
+
+        /* ── Action button ── */
+        .btn-view {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-view:hover { background: linear-gradient(90deg, #2980b9, #1f6fa0); color: white; transform: scale(1.04); }
+
+        /* ── Stats summary ── */
+        .users-summary {
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.84rem;
+            color: #7f8c8d;
+        }
+
+        /* empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert { animation: slideIn 0.3s ease; border-radius: 8px; }
+
+        @media (max-width: 768px) {
+            .hide-mobile { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+    </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="container page-wrapper">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <a href="/admin" class="back-btn">← Admin</a>
+            <h2>👥 Utilisateurs inscrits</h2>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Succès !</strong> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Erreur !</strong> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Search / filter bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom ou email..."
+               oninput="filterUsers()" />
+        <select id="roleFilter" onchange="filterUsers()">
+            <option value="">Tous les rôles</option>
+            <option value="DONOR">Donor</option>
+            <option value="ORGANIZATION">Organisation</option>
+            <option value="ADMIN">Admin</option>
+        </select>
+    </div>
+
+    <!-- Users table -->
+    <div class="users-card">
+        <div th:if="${users.isEmpty()}" class="empty-state">
+            <p style="font-size:2rem;">👤</p>
+            <p style="font-size:1rem; margin-top:10px;">Aucun utilisateur inscrit pour le moment.</p>
+        </div>
+
+        <div th:if="${!users.isEmpty()}">
+            <table class="users-table" id="usersTable">
+                <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th class="hide-mobile">Téléphone</th>
+                    <th>Rôle</th>
+                    <th class="hide-mobile">Langue</th>
+                    <th style="text-align:center;">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user, stat : ${users}"
+                    th:data-name="${#strings.toLowerCase(user.fullName)}"
+                    th:data-email="${#strings.toLowerCase(user.email)}"
+                    th:data-role="${user.role}"
+                    onclick="window.location.href=this.dataset.href"
+                    th:attr="data-href=@{/admin/users/{id}(id=${user.id})}">
+
+                    <td>
+                        <div class="user-name-cell">
+                            <!-- Avatar : 2 premières lettres du nom -->
+                            <div class="user-avatar"
+                                 th:classappend="${stat.index % 5 == 0 ? 'av-blue' :
+                                                      stat.index % 5 == 1 ? 'av-teal' :
+                                                      stat.index % 5 == 2 ? 'av-coral' :
+                                                      stat.index % 5 == 3 ? 'av-purple' : 'av-amber'}"
+                                 th:text="${#strings.substring(user.fullName, 0, 1) +
+                                               (#strings.contains(user.fullName,' ') ?
+                                                #strings.substring(#strings.substringAfter(user.fullName,' '), 0, 1) : '')}">
+                                XX
+                            </div>
+                            <div>
+                                <div class="user-name-text" th:text="${user.fullName}">Nom</div>
+                                <div class="user-email-text" th:text="${user.email}">email</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="hide-mobile" th:text="${user.phone != null ? user.phone : '—'}">—</td>
+
+                    <td>
+                            <span class="role-badge"
+                                  th:classappend="${'role-' + user.role}"
+                                  th:text="${user.role}">DONOR</span>
+                    </td>
+
+                    <td class="hide-mobile" th:text="${user.preferredLanguage != null ? user.preferredLanguage : '—'}">fr</td>
+
+                    <td style="text-align:center;" onclick="event.stopPropagation()">
+                        <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn-view">
+                            Voir / Modifier
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="users-summary">
+                <span id="visibleCount" th:text="${users.size()}">0</span> utilisateur(s) affiché(s)
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Footer ── -->
+<div style="text-align:center;color:#aaa;padding:20px;font-size:0.85rem;">
+    &copy; 2026 Gestion Charité. Tous droits réservés.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function filterUsers() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const role   = document.getElementById('roleFilter').value;
+        const rows   = document.querySelectorAll('#usersTable tbody tr');
+        let visible  = 0;
+
+        rows.forEach(row => {
+            const name   = row.dataset.name  || '';
+            const email  = row.dataset.email || '';
+            const rRole  = row.dataset.role  || '';
+
+            const matchSearch = name.includes(search) || email.includes(search);
+            const matchRole   = !role || rRole === role;
+
+            if (matchSearch && matchRole) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const counter = document.getElementById('visibleCount');
+        if (counter) counter.textContent = visible;
+    }
+</script>
+</body>
+</html>

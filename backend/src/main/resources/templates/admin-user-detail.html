@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Fiche – ' + ${user.fullName} + ' – Admin'">Fiche Utilisateur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            padding: 1rem 0;
+        }
+
+        .brand-button {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .page-wrapper { padding: 30px 0 60px; }
+
+        /* ── Page header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            background: rgba(44,62,80,0.08);
+            border: 1.5px solid #2c3e50;
+            color: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .back-btn:hover { background: #2c3e50; color: white; }
+
+        .page-header h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* ── Detail card ── */
+        .detail-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* ── Card header ── */
+        .card-hero {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            padding: 32px 28px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .hero-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+            letter-spacing: 1px;
+        }
+
+        .hero-info h3 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .hero-info .hero-email {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .hero-info .hero-role {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 3px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 8px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ── Stats row ── */
+        .stats-row {
+            display: flex;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 20px 10px;
+            border-right: 1px solid #f0f2f5;
+        }
+
+        .stat-item:last-child { border-right: none; }
+
+        .stat-item .s-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #2c3e50;
+            line-height: 1;
+        }
+
+        .stat-item .s-label {
+            font-size: 0.76rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* ── Form body ── */
+        .form-body { padding: 28px; }
+
+        .form-section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .form-row { margin-bottom: 20px; }
+
+        label.form-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border: 1.5px solid #e8ecf0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.92rem;
+            color: #2c3e50;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fafbfc;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+            outline: none;
+            background: white;
+        }
+
+        .form-control[readonly] {
+            background: #f4f6f8;
+            color: #7f8c8d;
+            cursor: default;
+        }
+
+        /* ── Action buttons ── */
+        .actions-bar {
+            display: flex;
+            gap: 12px;
+            padding: 20px 28px;
+            border-top: 1px solid #f0f2f5;
+            background: #fafbfc;
+            flex-wrap: wrap;
+        }
+
+        .btn-save {
+            background: linear-gradient(90deg, #27ae60 0%, #229954 100%);
+            border: none;
+            color: white;
+            padding: 11px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(90deg, #229954, #1e8449);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39,174,96,0.35);
+        }
+
+        .btn-back {
+            background: rgba(44,62,80,0.07);
+            border: 1.5px solid #bdc3c7;
+            color: #555;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-back:hover { background: #ecf0f1; color: #2c3e50; }
+
+        .btn-delete {
+            background: rgba(231,76,60,0.08);
+            border: 1.5px solid #e74c3c;
+            color: #e74c3c;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #e74c3c;
+            color: white;
+            box-shadow: 0 4px 12px rgba(231,76,60,0.3);
+        }
+
+        /* ── Modal ── */
+        .modal-content { border-radius: 14px; border: none; }
+        .modal-header { background: linear-gradient(90deg, #c0392b, #e74c3c); color: white; border-radius: 14px 14px 0 0; }
+        .modal-header .btn-close { filter: brightness(0) invert(1); }
+
+        /* ── Alert ── */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .alert { animation: slideIn 0.3s ease; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+    </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="container page-wrapper">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <a href="/admin/users" class="back-btn">← Utilisateurs</a>
+        <h2>👤 Fiche utilisateur</h2>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <strong>✅ Succès !</strong> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <strong>❌ Erreur !</strong> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- ── Detail card ── -->
+    <div class="detail-card">
+
+        <!-- Hero header -->
+        <div class="card-hero">
+            <div class="hero-avatar"
+                 th:text="${#strings.substring(user.fullName, 0, 1) +
+                            (#strings.contains(user.fullName,' ') ?
+                             #strings.substring(#strings.substringAfter(user.fullName,' '), 0, 1) : '')}">
+                XX
+            </div>
+            <div class="hero-info">
+                <h3 th:text="${user.fullName}">Nom Prénom</h3>
+                <div class="hero-email" th:text="${user.email}">email@example.com</div>
+                <span class="hero-role" th:text="${user.role}">DONOR</span>
+            </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="s-value" th:text="${donationsCount}">0</div>
+                <div class="s-label">💳 Dons effectués</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-value" th:text="${totalDonated} + ' MAD'">0,00 MAD</div>
+                <div class="s-label">💰 Montant total</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-value" th:text="${user.joinedOrganizationId != null ? '1' : '0'}">0</div>
+                <div class="s-label">🤝 Organisation rejointe</div>
+            </div>
+        </div>
+
+        <!-- Edit form -->
+        <form th:action="@{/admin/users/{id}/edit(id=${user.id})}" method="post">
+
+            <div class="form-body">
+
+                <!-- Informations personnelles -->
+                <div class="form-section-title">📋 Informations personnelles</div>
+
+                <div class="row form-row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label" for="fullName">Nom complet *</label>
+                        <input type="text" id="fullName" name="fullName" class="form-control"
+                               th:value="${user.fullName}" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="email">Adresse email *</label>
+                        <input type="email" id="email" name="email" class="form-control"
+                               th:value="${user.email}" required />
+                    </div>
+                </div>
+
+                <div class="row form-row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label" for="phone">Téléphone</label>
+                        <input type="text" id="phone" name="phone" class="form-control"
+                               th:value="${user.phone}" placeholder="+212 6XX XXX XXX" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="preferredLanguage">Langue préférée</label>
+                        <select id="preferredLanguage" name="preferredLanguage" class="form-select">
+                            <option value="fr" th:selected="${user.preferredLanguage == 'fr'}">🇫🇷 Français</option>
+                            <option value="ar" th:selected="${user.preferredLanguage == 'ar'}">🇲🇦 Arabe</option>
+                            <option value="en" th:selected="${user.preferredLanguage == 'en'}">🇬🇧 Anglais</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row form-row">
+                    <div class="col-12">
+                        <label class="form-label" for="address">Adresse</label>
+                        <input type="text" id="address" name="address" class="form-control"
+                               th:value="${user.address}" placeholder="Rue, ville, pays" />
+                    </div>
+                </div>
+
+                <!-- Rôle & sécurité -->
+                <div class="form-section-title mt-4">🔐 Rôle & sécurité</div>
+
+                <div class="row form-row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label" for="role">Rôle *</label>
+                        <select id="role" name="role" class="form-select" required>
+                            <option th:each="r : ${roles}"
+                                    th:value="${r}"
+                                    th:text="${r}"
+                                    th:selected="${user.role == r}">
+                                ROLE
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="userId">ID utilisateur</label>
+                        <input type="text" id="userId" class="form-control"
+                               th:value="${user.id}" readonly />
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Action buttons ── -->
+            <div class="actions-bar">
+                <button type="submit" class="btn-save">✓ Enregistrer les modifications</button>
+                <a href="/admin/users" class="btn-back">Annuler</a>
+                <button type="button" class="btn-delete"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    🗑 Supprimer
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<!-- ── Delete Confirmation Modal ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">⚠️ Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur
+                    <strong th:text="${user.fullName}">Nom</strong> ?</p>
+                <p class="text-muted mt-2" style="font-size:0.86rem;">
+                    ⚠️ Cette action est irréversible. Toutes les données associées à cet utilisateur seront perdues.
+                </p>
+            </div>
+            <div class="modal-footer" style="gap:10px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" style="margin:0;">
+                    <button type="submit" class="btn btn-danger fw-bold">Oui, supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Footer ── -->
+<div style="text-align:center;color:#aaa;padding:20px;font-size:0.85rem;">
+    &copy; 2026 Gestion Charité. Tous droits réservés.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

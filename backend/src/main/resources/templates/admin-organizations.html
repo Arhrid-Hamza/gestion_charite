@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organisations – Admin Gestion Charité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        html { scroll-behavior: smooth; }
+
+        .navbar-custom {
+            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            padding: 1rem 0;
+        }
+        .brand-button { background: none; border: none; font-size: 1.4rem; font-weight: bold; color: #fff; cursor: pointer; text-decoration: none; }
+
+        .page-wrapper { padding: 30px 0 60px; }
+
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+        }
+        .page-header h2 { font-size: 1.9rem; font-weight: 800; color: #2c3e50; margin: 0; }
+
+        .back-btn {
+            background: rgba(44,62,80,0.08); border: 1.5px solid #2c3e50; color: #2c3e50;
+            padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem;
+            text-decoration: none; transition: all 0.2s; white-space: nowrap;
+        }
+        .back-btn:hover { background: #2c3e50; color: white; }
+
+        /* Search bar */
+        .search-bar {
+            background: white; border-radius: 10px; padding: 14px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        }
+        .search-bar input, .search-bar select {
+            border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 14px;
+            font-size: 0.9rem; outline: none; transition: border-color 0.2s; background: white;
+        }
+        .search-bar input { flex: 1; min-width: 200px; }
+        .search-bar input:focus, .search-bar select:focus { border-color: #3498db; }
+
+        /* Table card */
+        .orgs-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden; }
+
+        .orgs-table { width: 100%; border-collapse: collapse; }
+        .orgs-table thead { background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%); color: white; }
+        .orgs-table thead th { padding: 14px 16px; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .orgs-table tbody tr { border-bottom: 1px solid #f0f2f5; transition: background 0.15s; cursor: pointer; }
+        .orgs-table tbody tr:hover { background: #f8faff; }
+        .orgs-table tbody tr:last-child { border-bottom: none; }
+        .orgs-table tbody td { padding: 14px 16px; font-size: 0.9rem; color: #444; vertical-align: middle; }
+
+        /* Org avatar */
+        .org-avatar {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0; background: #e8f0fe;
+        }
+        .org-name-cell { display: flex; align-items: center; gap: 12px; }
+        .org-name-text { font-weight: 600; color: #2c3e50; }
+        .org-tax-text { font-size: 0.78rem; color: #7f8c8d; margin-top: 2px; }
+
+        /* Status badges */
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+        .status-APPROVED { background: #e6f9f0; color: #085041; }
+        .status-PENDING  { background: #fff4e6; color: #7a4100; }
+        .status-REJECTED { background: #fde8e8; color: #7a1200; }
+
+        .btn-view {
+            background: linear-gradient(90deg, #3498db, #2980b9); color: white;
+            border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.8rem;
+            font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-block;
+        }
+        .btn-view:hover { background: linear-gradient(90deg, #2980b9, #1f6fa0); color: white; transform: scale(1.04); }
+
+        .btn-approve-sm {
+            background: linear-gradient(90deg, #27ae60, #229954); color: white;
+            border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.78rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .btn-approve-sm:hover { transform: scale(1.04); }
+        .btn-approve-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .orgs-summary { padding: 12px 16px; background: #f8f9fa; border-top: 1px solid #e9ecef; font-size: 0.84rem; color: #7f8c8d; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #7f8c8d; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .alert { animation: slideIn 0.3s ease; border-radius: 8px; }
+
+        @media (max-width: 768px) { .hide-mobile { display: none; } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+    </div>
+</nav>
+
+<div class="container page-wrapper">
+
+    <div class="page-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <a href="/admin" class="back-btn">← Admin</a>
+            <h2>🏢 Organisations</h2>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Succès !</strong> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Erreur !</strong> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom, mission..." oninput="filterOrgs()" />
+        <select id="statusFilter" onchange="filterOrgs()">
+            <option value="">Tous les statuts</option>
+            <option value="APPROVED" th:selected="${statusFilter == 'APPROVED'}">✅ Approuvées</option>
+            <option value="PENDING"  th:selected="${statusFilter == 'PENDING'}">⏳ En attente</option>
+            <option value="REJECTED" th:selected="${statusFilter == 'REJECTED'}">❌ Rejetées</option>
+        </select>
+    </div>
+
+    <div class="orgs-card">
+        <div th:if="${organizations.isEmpty()}" class="empty-state">
+            <p style="font-size:2rem;">🏢</p>
+            <p style="font-size:1rem; margin-top:10px;">Aucune organisation enregistrée.</p>
+        </div>
+
+        <div th:if="${!organizations.isEmpty()}">
+            <table class="orgs-table" id="orgsTable">
+                <thead>
+                <tr>
+                    <th>Organisation</th>
+                    <th class="hide-mobile">Contact</th>
+                    <th class="hide-mobile">N° Fiscal</th>
+                    <th>Statut</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="org : ${organizations}"
+                    th:data-name="${#strings.toLowerCase(org.name)}"
+                    th:data-mission="${#strings.toLowerCase(org.mission != null ? org.mission : '')}"
+                    th:data-status="${org.status}">
+
+                    <td>
+                        <div class="org-name-cell">
+                            <div class="org-avatar">🏢</div>
+                            <div>
+                                <div class="org-name-text" th:text="${org.name}">Nom</div>
+                                <div class="org-tax-text" th:text="${org.mission != null ? #strings.abbreviate(org.mission, 60) : '—'}">Mission</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="hide-mobile">
+                        <div th:text="${org.primaryContactName != null ? org.primaryContactName : '—'}">—</div>
+                        <div style="font-size:0.78rem; color:#7f8c8d;" th:text="${org.primaryContactEmail != null ? org.primaryContactEmail : ''}"></div>
+                    </td>
+
+                    <td class="hide-mobile" th:text="${org.taxIdentificationNumber != null ? org.taxIdentificationNumber : '—'}">—</td>
+
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${'status-' + org.status}"
+                              th:text="${org.status}">PENDING</span>
+                    </td>
+
+                    <td style="text-align:center;" onclick="event.stopPropagation()">
+                        <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                            <a th:href="@{/admin/organizations/{id}(id=${org.id})}" class="btn-view">Voir</a>
+                            <form th:if="${org.status.toString() == 'PENDING'}"
+                                  th:action="@{/admin/{id}/approve(id=${org.id})}" method="post" style="margin:0;">
+                                <button type="submit" class="btn-approve-sm">✓ Approuver</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="orgs-summary">
+                <span id="visibleCount" th:text="${organizations.size()}">0</span> organisation(s) affichée(s)
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div style="text-align:center;color:#aaa;padding:20px;font-size:0.85rem;">
+    &copy; 2026 Gestion Charité. Tous droits réservés.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Pre-filter if status param in URL
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get('status');
+        if (status) {
+            document.getElementById('statusFilter').value = status;
+            filterOrgs();
+        }
+    });
+
+    function filterOrgs() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const status = document.getElementById('statusFilter').value;
+        const rows   = document.querySelectorAll('#orgsTable tbody tr');
+        let visible  = 0;
+        rows.forEach(row => {
+            const name    = row.dataset.name    || '';
+            const mission = row.dataset.mission || '';
+            const rStatus = row.dataset.status  || '';
+            const matchSearch = name.includes(search) || mission.includes(search);
+            const matchStatus = !status || rStatus === status;
+            if (matchSearch && matchStatus) { row.style.display = ''; visible++; }
+            else { row.style.display = 'none'; }
+        });
+        const counter = document.getElementById('visibleCount');
+        if (counter) counter.textContent = visible;
+    }
+</script>
+</body>
+</html>

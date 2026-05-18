@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Org – ' + ${org.name} + ' – Admin'">Fiche Organisation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+        .navbar-custom { background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 1rem 0; }
+        .brand-button { background: none; border: none; font-size: 1.4rem; font-weight: bold; color: #fff; cursor: pointer; text-decoration: none; }
+
+        .page-wrapper { padding: 30px 0 60px; }
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+
+        .back-btn { background: rgba(44,62,80,0.08); border: 1.5px solid #2c3e50; color: #2c3e50; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s; }
+        .back-btn:hover { background: #2c3e50; color: white; }
+
+        .page-header h2 { font-size: 1.6rem; font-weight: 800; color: #2c3e50; margin: 0; }
+
+        .detail-card { background: white; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 24px; }
+
+        .card-hero { background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%); padding: 32px 28px; display: flex; align-items: center; gap: 24px; }
+        .hero-avatar { width: 72px; height: 72px; border-radius: 14px; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+        .hero-info h3 { color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+        .hero-info .hero-sub { color: rgba(255,255,255,0.8); font-size: 0.88rem; }
+        .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 3px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin-top: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        .stats-row { display: flex; border-bottom: 1px solid #f0f2f5; }
+        .stat-item { flex: 1; text-align: center; padding: 20px 10px; border-right: 1px solid #f0f2f5; }
+        .stat-item:last-child { border-right: none; }
+        .stat-item .s-value { font-size: 1.6rem; font-weight: 800; color: #2c3e50; line-height: 1; }
+        .stat-item .s-label { font-size: 0.76rem; color: #7f8c8d; margin-top: 5px; font-weight: 500; }
+
+        .info-body { padding: 28px; }
+        .info-section-title { font-size: 0.8rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid #f0f2f5; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+
+        .info-field label { font-size: 0.78rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+        .info-field .field-value { font-size: 0.95rem; color: #2c3e50; font-weight: 500; padding: 10px 14px; background: #f8f9fa; border-radius: 8px; border: 1.5px solid #e8ecf0; }
+
+        .actions-bar { display: flex; gap: 12px; padding: 20px 28px; border-top: 1px solid #f0f2f5; background: #fafbfc; flex-wrap: wrap; }
+
+        .btn-approve { background: linear-gradient(90deg, #27ae60, #229954); border: none; color: white; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-approve:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(39,174,96,0.35); }
+        .btn-reject { background: rgba(231,76,60,0.08); border: 1.5px solid #e74c3c; color: #e74c3c; padding: 11px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-reject:hover { background: #e74c3c; color: white; }
+        .btn-back-link { background: #ecf0f1; border: none; color: #2c3e50; padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; transition: all 0.2s; }
+        .btn-back-link:hover { background: #dde1e3; color: #2c3e50; }
+
+        /* Actions table */
+        .section-card { background: white; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .section-header { padding: 18px 24px; border-bottom: 1px solid #f0f2f5; font-size: 1rem; font-weight: 700; color: #2c3e50; }
+        .mini-table { width: 100%; border-collapse: collapse; }
+        .mini-table thead { background: #f8f9fa; }
+        .mini-table thead th { padding: 10px 16px; font-size: 0.78rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; }
+        .mini-table tbody td { padding: 12px 16px; font-size: 0.88rem; color: #444; border-top: 1px solid #f0f2f5; }
+        .empty-mini { text-align: center; padding: 30px; color: #7f8c8d; font-size: 0.9rem; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .alert { animation: slideIn 0.3s ease; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+    </div>
+</nav>
+
+<div class="container page-wrapper">
+
+    <div class="page-header">
+        <a href="/admin/organizations" class="back-btn">← Organisations</a>
+        <h2>🏢 Fiche Organisation</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <strong>✅ Succès !</strong> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <strong>❌ Erreur !</strong> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Main detail card -->
+    <div class="detail-card">
+        <div class="card-hero">
+            <div class="hero-avatar">🏢</div>
+            <div class="hero-info">
+                <h3 th:text="${org.name}">Nom Organisation</h3>
+                <div class="hero-sub" th:text="${org.mission != null ? org.mission : 'Aucune mission renseignée'}">Mission</div>
+                <span class="hero-badge" th:text="${org.status}">PENDING</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="s-value" th:text="${actionsCount}">0</div>
+                <div class="s-label">🎯 Actions</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-value" th:text="${donationsCount}">0</div>
+                <div class="s-label">💳 Dons reçus</div>
+            </div>
+            <div class="stat-item">
+                <div class="s-value" th:text="${totalCollected} + ' MAD'">0 MAD</div>
+                <div class="s-label">💰 Collecté</div>
+            </div>
+        </div>
+
+        <!-- Info fields -->
+        <div class="info-body">
+            <div class="info-section-title">📋 Informations générales</div>
+            <div class="info-grid">
+                <div class="info-field">
+                    <label>Nom</label>
+                    <div class="field-value" th:text="${org.name}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>Statut</label>
+                    <div class="field-value" th:text="${org.status}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>Adresse légale</label>
+                    <div class="field-value" th:text="${org.legalAddress != null ? org.legalAddress : '—'}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>N° Fiscal</label>
+                    <div class="field-value" th:text="${org.taxIdentificationNumber != null ? org.taxIdentificationNumber : '—'}">—</div>
+                </div>
+            </div>
+
+            <div class="info-section-title mt-4">📞 Contact principal</div>
+            <div class="info-grid">
+                <div class="info-field">
+                    <label>Nom du contact</label>
+                    <div class="field-value" th:text="${org.primaryContactName != null ? org.primaryContactName : '—'}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>Email</label>
+                    <div class="field-value" th:text="${org.primaryContactEmail != null ? org.primaryContactEmail : '—'}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>Téléphone</label>
+                    <div class="field-value" th:text="${org.primaryContactPhone != null ? org.primaryContactPhone : '—'}">—</div>
+                </div>
+                <div class="info-field">
+                    <label>ID Organisation</label>
+                    <div class="field-value" th:text="${org.id}">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="actions-bar">
+            <form th:if="${org.status.toString() == 'PENDING'}"
+                  th:action="@{/admin/{id}/approve(id=${org.id})}" method="post" style="margin:0;">
+                <button type="submit" class="btn-approve">✓ Approuver</button>
+            </form>
+            <form th:if="${org.status.toString() == 'APPROVED'}"
+                  th:action="@{/admin/organizations/{id}/reject(id=${org.id})}" method="post" style="margin:0;">
+                <button type="submit" class="btn-reject">✗ Rejeter</button>
+            </form>
+            <a href="/admin/organizations" class="btn-back-link">← Retour</a>
+        </div>
+    </div>
+
+    <!-- Actions table -->
+    <div class="section-card">
+        <div class="section-header">🎯 Actions caritatives de cette organisation (<span th:text="${actionsCount}">0</span>)</div>
+        <div th:if="${actions == null or actions.isEmpty()}" class="empty-mini">
+            Aucune action caritative enregistrée.
+        </div>
+        <table th:if="${actions != null and !actions.isEmpty()}" class="mini-table">
+            <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Catégorie</th>
+                <th>Objectif</th>
+                <th>Collecté</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="action : ${actions}">
+                <td th:text="${action.title != null ? action.title : '—'}">—</td>
+                <td th:text="${action.categoryName != null ? action.categoryName : '—'}">—</td>
+                <td th:text="${action.targetAmount != null ? action.targetAmount + ' MAD' : '—'}">—</td>
+                <td th:text="${action.collectedAmount != null ? action.collectedAmount + ' MAD' : '0 MAD'}">0 MAD</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div style="text-align:center;color:#aaa;padding:20px;font-size:0.85rem;">
+    &copy; 2026 Gestion Charité. Tous droits réservés.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
