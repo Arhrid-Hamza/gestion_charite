@@ -6,6 +6,8 @@ import com.devbuild.gestion_charite.entity.Organization;
 import com.devbuild.gestion_charite.entity.enums.OrganizationStatus;
 
 public interface OrganizationRepository extends MongoRepository<Organization, Long> {
+	boolean existsByName(String name);
+
 	boolean existsByTaxIdentificationNumber(String taxIdentificationNumber);
 
 	java.util.List<Organization> findByStatus(OrganizationStatus status);

@@ -10,6 +10,7 @@ const PENDING_DONATION_KEY = 'pendingDonationPayment'
 interface PaymentRequest {
   actionId: number
   donorUserId: number
+  participantUserId?: number
   amount: number
   message: string
 }
@@ -111,6 +112,7 @@ export function DonatePage({
       const paymentRequest: PaymentRequest = {
         actionId: parsedActionId,
         donorUserId: userId,
+        participantUserId: userId,
         amount: parsedAmount,
         message,
       }

@@ -1,0 +1,37 @@
+[
+  {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "name": "Education",
+    "_class": "com.devbuild.gestion_charite.entity.Category"
+  },
+  {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "name": "Health",
+    "_class": "com.devbuild.gestion_charite.entity.Category"
+  },
+  {
+    "_id": {
+      "$numberLong": "3"
+    },
+    "name": "Food",
+    "_class": "com.devbuild.gestion_charite.entity.Category"
+  },
+  {
+    "_id": {
+      "$numberLong": "4"
+    },
+    "name": "Environment",
+    "_class": "com.devbuild.gestion_charite.entity.Category"
+  },
+  {
+    "_id": {
+      "$numberLong": "5"
+    },
+    "name": "Emergency Relief",
+    "_class": "com.devbuild.gestion_charite.entity.Category"
+  }
+]

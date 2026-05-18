@@ -1,0 +1,70 @@
+[
+  {
+    "_id": {
+      "$numberLong": "1"
+    },
+    "name": "Hope Association",
+    "legalAddress": "123 Rue de la Paix, Casablanca 20000, Morocco",
+    "taxIdentificationNumber": "MA001234567890",
+    "primaryContactName": "Ahmed Hassan",
+    "primaryContactEmail": "contact@hope.org",
+    "password": "Hope@12345",
+    "primaryContactPhone": "+212 522 12 34 56",
+    "logoUrl": "https://via.placeholder.com/200/0066cc/ffffff?text=Hope",
+    "description": "A leading nonprofit dedicated to transforming lives through education and healthcare initiatives in underserved communities.",
+    "mission": "Empowering communities through education, healthcare, and sustainable development",
+    "status": "ACTIVE",
+    "_class": "com.devbuild.gestion_charite.entity.Organization"
+  },
+  {
+    "_id": {
+      "$numberLong": "2"
+    },
+    "name": "Health for All Foundation",
+    "legalAddress": "456 Avenue Mohammed V, Fez 30000, Morocco",
+    "taxIdentificationNumber": "MA002345678901",
+    "primaryContactName": "Fatima Nouri",
+    "primaryContactEmail": "contact@healthforall.org",
+    "password": "Health@12345",
+    "primaryContactPhone": "+212 535 62 34 56",
+    "logoUrl": "https://via.placeholder.com/200/00cc66/ffffff?text=Health",
+    "description": "Providing accessible healthcare services and medical training to rural and urban communities.",
+    "mission": "Ensuring universal access to quality healthcare for all",
+    "status": "ACTIVE",
+    "_class": "com.devbuild.gestion_charite.entity.Organization"
+  },
+  {
+    "_id": {
+      "$numberLong": "3"
+    },
+    "name": "Green Earth Initiative",
+    "legalAddress": "789 Boulevard Zerktouni, Marrakech 40000, Morocco",
+    "taxIdentificationNumber": "MA003456789012",
+    "primaryContactName": "Hassan Al-Mansouri",
+    "primaryContactEmail": "contact@greenearth.org",
+    "password": "Green@12345",
+    "primaryContactPhone": "+212 524 42 56 78",
+    "logoUrl": "https://via.placeholder.com/200/00aa00/ffffff?text=Green",
+    "description": "Environmental protection and sustainable development through community engagement and conservation projects.",
+    "mission": "Protecting our planet for future generations through sustainable practices",
+    "status": "ACTIVE",
+    "_class": "com.devbuild.gestion_charite.entity.Organization"
+  },
+  {
+    "_id": {
+      "$numberLong": "4"
+    },
+    "name": "Food Security Alliance",
+    "legalAddress": "321 Rue Colbert, Rabat 10000, Morocco",
+    "taxIdentificationNumber": "MA004567890123",
+    "primaryContactName": "Leila Benali",
+    "primaryContactEmail": "contact@foodsecurity.org",
+    "password": "Food@12345",
+    "primaryContactPhone": "+212 537 72 45 89",
+    "logoUrl": "https://via.placeholder.com/200/ff6600/ffffff?text=Food",
+    "description": "Fighting hunger and malnutrition through food distribution and nutrition education programs.",
+    "mission": "Ending food insecurity and ensuring nutritional well-being",
+    "status": "ACTIVE",
+    "_class": "com.devbuild.gestion_charite.entity.Organization"
+  }
+]

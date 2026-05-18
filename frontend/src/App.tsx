@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { I18N } from './types/i18n'
-import type { Locale, User, CharityAction, Organization } from './types'
+import type { Locale, User, CharityAction, Organization, Donation, Participation } from './types'
 import { Layout } from './components/Layout'
 import { Header } from './components/Header'
 import { AuthPage } from './components/AuthPage'
@@ -11,6 +11,7 @@ import { ParticipatePage } from './components/ParticipatePage'
 import { OrganizationPage } from './components/OrganizationPage'
 import { OrganizationDashboard } from './components/OrganizationDashboard'
 import { AdminPage } from './components/AdminPage'
+import { useApi } from './hooks/useApi'
 import './App.css'
 
 type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard'
@@ -21,6 +22,74 @@ interface DashboardState {
   currentPage: PageType
   selectedAction: CharityAction | null
   selectedOrg: Organization | null
+}
+
+function DashboardContent({ user, t, onNavigate }: { user: User, t: any, onNavigate: (page: any) => void }) {
+  const { call } = useApi()
+  const [donations, setDonations] = useState<Donation[]>([])
+  const [participations, setParticipations] = useState<Participation[]>([])
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const load = async () => {
+      try {
+        const dona = await call<Donation[]>(`/users/${user.id}/donations`).catch(() => [])
+        const partic = await call<Participation[]>(`/participations/user/${user.id}`).catch(() => [])
+        setDonations(dona || [])
+        setParticipations(partic || [])
+      } catch {
+        setDonations([])
+        setParticipations([])
+      }
+    }
+    void load()
+  }, [user?.id, call])
+
+  const totalDonated = donations.reduce((sum, d) => sum + (typeof d.amount === 'number' ? d.amount : 0), 0)
+
+  return (
+    <div className="dashboard-hero">
+      <h1>{t.welcome}, {user.fullName}!</h1>
+      <p>{t.dashboardDesc}</p>
+
+      <div className="quick-stats">
+        <div className="stat-box">
+          <span className="stat-icon">🤝</span>
+          <div>
+            <h4>{t.organization}</h4>
+            <p>0 {t.active}</p>
+          </div>
+        </div>
+        <div className="stat-box">
+          <span className="stat-icon">💰</span>
+          <div>
+            <h4>{t.totalDonated}</h4>
+            <p>${totalDonated.toFixed(2)}</p>
+          </div>
+        </div>
+        <div className="stat-box">
+          <span className="stat-icon">🎉</span>
+          <div>
+            <h4>{t.participate}</h4>
+            <p>{participations.length} {t.events}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="action-buttons">
+        <button className="btn-action" onClick={() => onNavigate('explore')}>
+          🔍 {t.explore}
+        </button>
+        <button className="btn-action" onClick={() => onNavigate('donate')}>
+          💳 {t.donate}
+        </button>
+        <button className="btn-action" onClick={() => onNavigate('organization')}>
+          🏢 {t.createOrganization}
+        </button>
+      </div>
+    </div>
+  )
 }
 
 function loadSavedUser(): User | null {
@@ -160,47 +229,8 @@ export function App() {
         currentPage={state.currentPage}
         onLogout={handleLogout}
       >
-        {state.currentPage === 'dashboard' && (
-          <div className="dashboard-hero">
-            <h1>{t.welcome}, {state.user.fullName}!</h1>
-            <p>{t.dashboardDesc}</p>
-
-            <div className="quick-stats">
-              <div className="stat-box">
-                <span className="stat-icon">🤝</span>
-                <div>
-                  <h4>{t.organization}</h4>
-                  <p>0 {t.active}</p>
-                </div>
-              </div>
-              <div className="stat-box">
-                <span className="stat-icon">💰</span>
-                <div>
-                  <h4>{t.totalDonated}</h4>
-                  <p>$0.00</p>
-                </div>
-              </div>
-              <div className="stat-box">
-                <span className="stat-icon">🎉</span>
-                <div>
-                  <h4>{t.participate}</h4>
-                  <p>0 {t.events}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="action-buttons">
-              <button className="btn-action" onClick={() => handleNavigate('explore')}>
-                🔍 {t.explore}
-              </button>
-              <button className="btn-action" onClick={() => handleNavigate('donate')}>
-                💳 {t.donate}
-              </button>
-              <button className="btn-action" onClick={() => handleNavigate('organization')}>
-                🏢 {t.createOrganization}
-              </button>
-            </div>
-          </div>
+        {state.currentPage === 'dashboard' && state.user && (
+          <DashboardContent user={state.user} t={t} onNavigate={handleNavigate} />
         )}
 
         {state.currentPage === 'explore' && (
@@ -212,7 +242,9 @@ export function App() {
             locale={state.locale}
             userId={state.user.id}
             selectedAction={state.selectedAction || undefined}
-            onSuccess={() => handleNavigate('profile')}
+            onSuccess={() => {
+              setTimeout(() => handleNavigate('profile'), 500)
+            }}
           />
         )}
 

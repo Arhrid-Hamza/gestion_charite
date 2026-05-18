@@ -456,7 +456,20 @@ body {
 
 /* ── RESPONSIVE ─────────────────────────── */
 
+.navbar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  display: none;
+}
+
 @media (max-width: 960px) {
+  .navbar-backdrop { display: block; }
+
   .navbar-toggler { display: flex; align-items: center; justify-content: center; }
 
   .navbar-collapse {
@@ -469,6 +482,7 @@ body {
     padding: 1rem 1.25rem;
     flex-direction: column;
     align-items: flex-start;
+    z-index: 200;
   }
 
   .navbar-collapse.show { display: flex; }

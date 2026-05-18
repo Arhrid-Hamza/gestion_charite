@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/static-components */
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { Locale, User } from '../types'
 import { I18N } from '../types/i18n'
 import '../styles/Layout.css'
@@ -47,6 +47,7 @@ export function Layout({
 }: LayoutProps) {
   const t = I18N[locale]
   const [menuOpen, setMenuOpen] = useState(false)
+  const navbarRef = useRef<HTMLDivElement>(null)
   const isOrganizerSession = user?.role === 'ORGANIZER'
 
   function isActive(page: PageType) {
@@ -54,9 +55,25 @@ export function Layout({
   }
 
   function handleNavigate(page: PageType) {
-    onNavigate(page)
+    // Close overlay immediately, so clicks on the navbar never get blocked.
     setMenuOpen(false)
+    onNavigate(page)
   }
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement
+      if (navbarRef.current && !navbarRef.current.contains(target) && menuOpen) {
+        setMenuOpen(false)
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [menuOpen])
 
   function NavBtn({
     page,
@@ -87,7 +104,7 @@ export function Layout({
   return (
     <div className="layout">
       {/* ── Navbar ───────────────────────────── */}
-      <nav className="navbar-custom">
+      <nav className="navbar-custom" ref={navbarRef}>
         <div className="container">
           {/* Brand */}
           <button
@@ -182,6 +199,15 @@ export function Layout({
 
       {/* ── Page content ─────────────────────── */}
       <div className="container layout-container">{children}</div>
+
+      {/* ── Mobile menu backdrop ─────────────── */}
+      {menuOpen && (
+        <div
+          className="navbar-backdrop"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* ── Footer ───────────────────────────── */}
       <footer className="layout-footer">

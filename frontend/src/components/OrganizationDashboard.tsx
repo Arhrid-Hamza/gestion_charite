@@ -53,7 +53,7 @@ function normalizeMediaUrls(value: string) {
     .join(',')
 }
 
-export function OrganizationDashboard({ locale: _locale, user, onNavigate }: OrganizationDashboardProps) {
+export function OrganizationDashboard({ user, onNavigate }: OrganizationDashboardProps) {
   const { call, error, isLoading, setError } = useApi()
 
   const [organization, setOrganization] = useState<Organization | null>(null)
@@ -255,7 +255,19 @@ export function OrganizationDashboard({ locale: _locale, user, onNavigate }: Org
 
         {organization ? (
           <>
+            {/* Added button to view/jump to your organization page from dashboard */}
+            <div className="org-dashboard-top-actions">
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => onNavigate('organization')}
+              >
+                Leave organization
+              </button>
+            </div>
+
             <div className="org-metrics-grid">
+
               <div className="metric-card metric-primary">
                 <span className="metric-label">Organization</span>
                 <strong className="metric-value">{organization.name}</strong>

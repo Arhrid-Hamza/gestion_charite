@@ -9,7 +9,7 @@ import { Alert } from './Header'
 import '../styles/AuthPage.css'
 
 function normalizeApiBaseUrl(rawValue: string | undefined) {
-  const base = (rawValue ?? 'http://localhost:8080/api').trim().replace(/\/+$/, '')
+  const base = (rawValue ?? 'http://localhost:8081/api').trim().replace(/\/+$/, '')
   return /\/api$/i.test(base) ? base : `${base}/api`
 }
 
@@ -47,6 +47,10 @@ interface AuthPageProps {
 export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPageProps) {
   const t = I18N[locale]
   const { call, error, isLoading, setError } = useApi()
+
+  // If organization login endpoint returns (organization + user), we need to support it
+  // in order to allow access to the organization area.
+  // This is required because org login responses are different from user login responses.
 
   const [authType, setAuthType] = useState<'user' | 'organization'>('user')
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -628,6 +632,9 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
 
   // Handler for organization login
   async function handleOrgLogin(event: FormEvent<HTMLFormElement>) {
+    // Backend returns 401 with { error: "Identifiants organisation invalides" }.
+    // Also, the endpoint returns ONLY the Organization (not {organization, user}).
+
     event.preventDefault()
     setSuccess('')
 
@@ -637,6 +644,7 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
     }
 
     try {
+      // /organizations/login returns Organization only (or 401 with { error: ... })
       const org = await call<Organization>('/organizations/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
