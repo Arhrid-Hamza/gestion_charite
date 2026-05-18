@@ -43,6 +43,7 @@
 .pp-wrapper {
   display: grid;
   grid-template-columns: 300px 1fr;
+  align-items: start;
   min-height: 100vh;
 }
 
@@ -55,8 +56,8 @@
   padding: 3rem 1.75rem 2.5rem;
   position: sticky;
   top: 0;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow: visible;
   animation: pp-in-left 0.65s var(--ease) both;
 }
 
