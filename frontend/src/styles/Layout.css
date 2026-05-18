@@ -200,6 +200,11 @@ body {
   transition: border-color 0.2s;
 }
 
+.lang-selector select option {
+  color: var(--ink);
+  background: var(--surface);
+}
+
 .lang-selector select:hover { border-color: rgba(255,255,255,0.5); }
 .lang-selector select:focus {
   outline: none;
