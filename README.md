@@ -1,126 +1,135 @@
 # Gestion Charite
 
-Gestion Charite is a full-stack charity management platform designed to manage organizations, charity actions, and donations through a clean API-driven architecture.
+Gestion Charite is a full-stack charity management platform for discovering charity actions, creating organizations, donating, and managing participation from a single web app.
 
-The project is structured with a Spring Boot backend and a React + TypeScript frontend in separate folders, connected through REST APIs.
+The project is split into a Spring Boot backend and a React + TypeScript frontend, with MongoDB persistence and Docker support for local development.
 
-## Project Overview
+## What The App Does
 
-This application demonstrates a modern web architecture for nonprofit and donation workflows:
+- Lets users sign in and manage their profile
+- Shows charity actions and organization listings
+- Supports donations with PayPal and Stripe flows
+- Lets users participate in actions and track their history
+- Provides organization dashboards for organizer accounts
+- Includes an admin area for platform management
+- Handles Google OAuth configuration on the backend
 
-- Backend API for charity actions, donations, users, and organizations
-- MongoDB persistence for development and testing
-- React TypeScript frontend consuming backend endpoints
-- Clean separation of frontend and backend responsibilities
+## Tech Stack
 
-## Architecture
+- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, Thymeleaf, Mail
+- Frontend: React 19, TypeScript, Vite, Bootstrap
+- Database: MongoDB
+- Integration: REST API under `/api`
 
-- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, MongoDB
-- Frontend: React 19, TypeScript, Vite
-- Communication: REST APIs under /api
-- Development CORS: enabled for frontend at http://localhost:5173
+## Repository Layout
 
-## Repository Structure
-
-- backend: Spring Boot application and API
-- frontend: React TypeScript client
+- `backend/` Spring Boot API and server-side templates
+- `frontend/` React client application
+- `docker-compose.yml` Local Docker setup for MongoDB, backend, and frontend
+- `data/` Seed data used by the backend
 
 ## Prerequisites
 
 - Java 17 or higher
 - Node.js 20 or higher
 - npm 10 or higher
+- Docker Desktop if you want to use the compose setup
 
-## Getting Started
+## Environment Variables
 
-### 1) Run Backend
+### Frontend
 
-1. Open a terminal in backend
-2. Start the app
+Create a `.env` file in `frontend/` if you want to override the defaults from `frontend/.env.example`.
+
+- `VITE_API_URL` API base URL used by the React app
+- `VITE_PAYPAL_CLIENT_ID` PayPal client id for donation flow
+- `VITE_STRIPE_PUBLISHABLE_KEY` Stripe publishable key for donation flow
+
+The example file currently points `VITE_API_URL` to `http://localhost:8081/api`, so adjust it to match your backend port if needed.
+
+### Backend
+
+The backend reads these environment variables for Google OAuth and frontend redirects:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI` default: `http://localhost:8080/api/auth/google/callback`
+- `APP_FRONTEND_URL` default: `http://localhost:5173`
+- `SPRING_DATA_MONGODB_URI` used by Docker and local overrides
+
+## Run Locally
+
+### Option 1: Docker Compose
+
+From the repository root:
 
 ```powershell
+docker compose up --build
+```
+
+This starts:
+
+- MongoDB on `27017`
+- Backend on `8080`
+- Frontend on `3000`
+
+### Option 2: Run Backend And Frontend Separately
+
+Start MongoDB first, then run the backend:
+
+```powershell
+cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-Backend will run on:
+Backend defaults to `http://localhost:8080`.
 
-- http://localhost:8080
-
-MongoDB is expected at:
-
-- mongodb://localhost:27017/gestion_charite
-
-If you use Docker Compose, a MongoDB container is started automatically.
-
-### 2) Run Frontend
-
-1. Open a terminal in frontend
-2. Install dependencies
-3. Start development server
+Then start the frontend:
 
 ```powershell
+cd frontend
 npm install
 npm run dev
 ```
 
-Frontend will run on:
+Frontend defaults to `http://localhost:5173`.
 
-- http://localhost:5173
+## Main API Areas
 
-## Environment Configuration
+The backend exposes REST endpoints under `http://localhost:8080/api` for:
 
-Frontend uses the following environment variable:
+- `auth` Google authentication and session checks
+- `users` user profile and donation history
+- `organizations` organization listing and creation
+- `charity-actions` charity action management
+- `donations` donation creation and lookup
+- `participations` event participation management
+- `payments` PayPal and Stripe confirmation flows
+- `admin` admin-oriented data and maintenance operations
 
-- VITE_API_URL (default: http://localhost:8080/api)
-
-An example file is available in frontend/.env.example.
-
-Backend Google OAuth uses these environment variables:
-
-- GOOGLE_CLIENT_ID
-- GOOGLE_CLIENT_SECRET
-- GOOGLE_REDIRECT_URI (default: http://localhost:8080/api/auth/google/callback)
-- APP_FRONTEND_URL (default: http://localhost:5173)
-
-Quick checks:
-
-- GET /api/auth/google/config returns `configured: true` when backend credentials are set.
-- GET /api/auth/google/start starts the OAuth redirect flow.
-
-## API Summary
-
-Base URL: http://localhost:8080/api
-
-Main endpoints include:
-
-- GET /health
-- GET/POST/PUT/DELETE /charity-actions
-- GET/POST/DELETE /donations
-- GET /donations/action/{actionId}
-- GET/POST /users
-- GET/POST/PUT/DELETE /organizations
-
-Additional endpoints exist for auth/admin/language placeholders.
-
-## Build Commands
+## Build And Test
 
 ### Frontend
 
 ```powershell
+cd frontend
 npm run build
+npm run lint
 ```
 
 ### Backend
 
 ```powershell
+cd backend
 .\mvnw.cmd test
 ```
 
 ## Notes
 
 - The backend seeds default data on startup when the database is empty.
-- MongoDB data persists locally when running Docker Compose through the `mongo-data` volume.
+- MongoDB data persists locally through the `mongo-data` volume when using Docker Compose.
+- The frontend includes a global payment finalizer that handles PayPal and Stripe redirects back into the app.
 
 ## License
 
-This project is currently provided without an explicit license file.
+This project does not currently include an explicit license file.
