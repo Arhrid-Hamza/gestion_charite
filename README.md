@@ -16,14 +16,14 @@ The project is split into a Spring Boot backend and a React + TypeScript fronten
 
 ## Tech Stack
 
-- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, Thymeleaf, Mail
+- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, Thymeleaf server-side templates, Mail
 - Frontend: React 19, TypeScript, Vite, Bootstrap
 - Database: MongoDB
 - Integration: REST API under `/api`
 
 ## Repository Layout
 
-- `backend/` Spring Boot API and server-side templates
+- `backend/` Spring Boot API and Thymeleaf server-side templates
 - `frontend/` React client application
 - `docker-compose.yml` Local Docker setup for MongoDB, backend, and frontend
 - `data/` Seed data used by the backend
