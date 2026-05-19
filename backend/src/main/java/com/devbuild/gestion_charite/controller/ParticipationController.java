@@ -19,7 +19,7 @@ import com.devbuild.gestion_charite.service.MongoSequenceService;
 
 @RestController
 @RequestMapping("/api/participations")
-public class ParticipationController {
+public class 	ParticipationController {
 
 	private final ParticipationRepository participationRepository;
 	private final UserRepository userRepository;

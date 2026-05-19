@@ -362,7 +362,6 @@ export function App() {
               locale={state.locale}
               user={state.user}
               onUpdate={handleProfileUpdate}
-              refreshKey={state.profileRefresh}
             />
           </ErrorBoundary>
         )}
