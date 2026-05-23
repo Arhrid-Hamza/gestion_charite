@@ -1,0 +1,22 @@
+sequenceDiagram
+  participant U as User (Browser)
+  participant FE as Frontend
+  participant BE as Backend
+  participant Stripe
+  participant DB as MongoDB
+
+  U->>FE: Click Donate (amount, actionId)
+  FE->>BE: POST /payments/stripe/create-checkout-session {actionId, donorUserId, amount, message}
+  BE->>Stripe: POST /v1/checkout/sessions (with metadata: actionId, donorUserId, amount, message)
+  Stripe-->>BE: 200 {sessionId, checkoutUrl}
+  BE-->>FE: 200 {sessionId, checkoutUrl}
+  FE-->>U: Redirect to Stripe checkout URL
+  U->>Stripe: Complete payment (card)
+  Stripe-->>FE: Redirect to FE with session_id
+  FE->>BE: POST /payments/stripe/confirm-session?sessionId={id}
+  BE->>Stripe: GET /v1/checkout/sessions/{id}
+  Stripe-->>BE: 200 {payment_status=paid, metadata}
+  BE->>DB: createConfirmedDonation(actionId, donorUserId, amount, message, STRIPE, transactionId)
+  DB-->>BE: saved donation
+  BE-->>FE: 200 {donation}
+  FE-->>U: Show success
