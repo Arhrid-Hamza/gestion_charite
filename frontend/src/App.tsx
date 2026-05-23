@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import { I18N } from './types/i18n'
 import type { Locale, User, CharityAction, Organization, Donation, Participation } from './types'
 import { Layout } from './components/Layout'
@@ -338,6 +339,7 @@ export function App() {
           onAuthSuccess={handleAuthSuccess}
           onOrgAuthSuccess={handleOrgAuthSuccess}
         />
+        <Analytics />
       </div>
     )
   }
@@ -433,6 +435,7 @@ export function App() {
           <AdminPage locale={state.locale} />
         )}
       </Layout>
+      <Analytics />
     </div>
   )
 }
