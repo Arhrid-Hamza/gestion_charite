@@ -1,0 +1,13 @@
+[build]
+  base    = "frontend"
+  command = "npm install --include=dev && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_ENV = "development"
+
+# SPA fallback: serve index.html for all unmatched routes
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
