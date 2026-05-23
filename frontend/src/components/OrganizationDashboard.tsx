@@ -67,7 +67,7 @@ function toActionFormState(action: CharityAction): ActionFormState {
     title: action.title || '',
     description: action.description || '',
     targetAmount: String(action.targetAmount ?? ''),
-    categoryName: action.categoryName || '',
+    categoryName: action.categoryName || action.category || '',
     location: action.location || '',
     startDate: toDateInputValue(action.startDate),
     endDate: toDateInputValue(action.endDate),
@@ -118,11 +118,18 @@ export function OrganizationDashboard({ locale, user, onNavigate, selectedAction
       return
     }
 
-    setOrganization(userOrg)
-    setFormData(userOrg)
+    let resolvedOrg = userOrg
+    try {
+      resolvedOrg = await call<Organization>(`/organizations/${userOrg.id}`)
+    } catch {
+      // Keep fallback data from list endpoint when details endpoint is unavailable.
+    }
+
+    setOrganization(resolvedOrg)
+    setFormData(resolvedOrg)
 
     const orgActions = await call<CharityAction[]>(
-      `/charity-actions?organizationId=${userOrg.id}`,
+      `/charity-actions?organizationId=${resolvedOrg.id}`,
     )
     setActions(orgActions)
   }
@@ -181,21 +188,24 @@ export function OrganizationDashboard({ locale, user, onNavigate, selectedAction
   }
 
   const handleEditAction = async (action: CharityAction) => {
-    // Open immediately with local values for instant feedback.
     setActionForm(toActionFormState(action))
     setActionFormOpen(true)
 
-    // Then refresh with latest API values when available.
+    if (!action.id) {
+      return
+    }
+
     try {
       const fresh = await call<CharityAction>(`/charity-actions/${action.id}`)
       setActionForm(toActionFormState(fresh))
-    } catch {}
+    } catch {
+      // Keep already loaded list data if detailed fetch fails.
+    }
   }
 
   const handleStartOrganizationEdit = async () => {
     if (!organization) return
 
-    // Open immediately with currently loaded values.
     setFormData(organization)
     setEditMode(true)
 
@@ -203,7 +213,9 @@ export function OrganizationDashboard({ locale, user, onNavigate, selectedAction
       const fresh = await call<Organization>(`/organizations/${organization.id}`)
       setOrganization(fresh)
       setFormData(fresh)
-    } catch {}
+    } catch {
+      // Keep currently loaded organization data if detailed fetch fails.
+    }
   }
 
   const handleViewAction = (action: CharityAction) => {

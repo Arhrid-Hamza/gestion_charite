@@ -95,11 +95,37 @@ public class AdminController {
 			HttpSession session,
 			RedirectAttributes redirectAttributes) {
 
-		if (ADMIN_EMAIL.equalsIgnoreCase(email) && ADMIN_PASSWORD.equals(password)) {
+		boolean hardcodedAdminMatch = ADMIN_EMAIL.equalsIgnoreCase(email) && ADMIN_PASSWORD.equals(password);
+		boolean superAdminMatch = userRepository.findByEmail(email)
+				.filter(user -> user.getRole() == Role.SUPER_ADMIN)
+				.map(user -> hashPassword(password).equals(user.getPasswordHash()))
+				.orElse(false);
+
+		if (hardcodedAdminMatch || superAdminMatch) {
 			session.setAttribute("adminLoggedIn", Boolean.TRUE);
 			return "redirect:/admin";
 		}
 		redirectAttributes.addFlashAttribute("loginError", "Email ou mot de passe incorrect.");
+		return "redirect:/admin/login";
+	}
+
+	// -----------------------------------------------------------------------
+	// Google super-admin login (POST)
+	// -----------------------------------------------------------------------
+	@PostMapping("/google-login")
+	public String processGoogleLogin(
+			@RequestParam String email,
+			HttpSession session,
+			RedirectAttributes redirectAttributes) {
+
+		User user = userRepository.findByEmail(email == null ? null : email.trim()).orElse(null);
+		if (user != null && user.getRole() == Role.SUPER_ADMIN) {
+			session.setAttribute("adminLoggedIn", Boolean.TRUE);
+			session.setAttribute("adminUserEmail", user.getEmail());
+			return "redirect:/admin";
+		}
+
+		redirectAttributes.addFlashAttribute("loginError", "Accès administrateur refusé.");
 		return "redirect:/admin/login";
 	}
 
@@ -109,7 +135,7 @@ public class AdminController {
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		session.invalidate();
-		return "redirect:http://localhost:5173";
+		return "admin-logout";
 	}
 
 	// -----------------------------------------------------------------------

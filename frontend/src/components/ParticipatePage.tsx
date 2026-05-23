@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useRef } from 'react'
 import { useApi } from '../hooks/useApi'
 import { I18N } from '../types/i18n'
 import { Alert } from './Header'
-import type { Locale, Participation } from '../types'
+import type { CharityAction, Locale, Participation } from '../types'
 import '../styles/ParticipatePage.css'
 
 interface ParticipatePageProps {
@@ -41,7 +42,9 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
 
   const [actionId, setActionId]   = useState(0)
   const [role, setRole]           = useState('VOLUNTEER')
+  const [actions, setActions]     = useState<CharityAction[]>([])
   const [participations, setParticipations] = useState<Participation[]>([])
+  const [displayParticipations, setDisplayParticipations] = useState<Participation[]>([])
   const [panel, setPanel]         = useState<Panel>('form')
   const [caretFired, setCaretFired] = useState(false)
   const [shakeField, setShakeField] = useState(false)
@@ -56,6 +59,35 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
       return () => window.clearTimeout(id)
     }
   }, [call, userId])
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      void call<CharityAction[]>('/charity-actions')
+        .then((payload) => setActions(payload || []))
+        .catch(() => setActions([]))
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [call])
+
+  useEffect(() => {
+    const actionTitleById = new Map(
+      actions
+        .filter((action) => action.id != null)
+        .map((action) => [action.id as number, action.title?.trim() || `Action #${action.id}`]),
+    )
+
+    setDisplayParticipations(
+      participations.map((participation) => {
+        const participationActionId = participation.actionId ?? participation.charityActionId
+        const actionTitle = participation.actionTitle || (participationActionId ? actionTitleById.get(participationActionId) : undefined)
+
+        return {
+          ...participation,
+          actionTitle,
+        }
+      }),
+    )
+  }, [actions, participations])
 
   async function handleRegister() {
     if (!userId || !actionId) {
@@ -80,6 +112,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
           // Keep both keys for backend compatibility; current backend requires actionId.
           actionId,
           charityActionId: actionId,
+          actionTitle: actions.find((action) => action.id === actionId)?.title,
           participantUserId: userId,
           roleInAction: role,
         }),
@@ -140,15 +173,25 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                   <div className="form-row">
                     <div className="mb-3">
                       <label htmlFor="action-id" className="form-label">{t.charityAction}</label>
-                      <input
+                      <select
                         id="action-id"
-                        type="number"
                         className={`form-control${shakeField ? ' form-control--shake' : ''}`}
                         value={actionId || ''}
-                        onChange={(e) => setActionId(parseInt(e.target.value) || 0)}
-                        placeholder={t.charityActionIdPlaceholder}
-                        min={1}
-                      />
+                        onChange={(e) => setActionId(Number(e.target.value) || 0)}
+                        disabled={actions.length === 0}
+                      >
+                        <option value="">{actions.length === 0 ? 'Aucune action disponible' : 'Choisir une action'}</option>
+                        {actions.map((action) => (
+                          <option key={action.id} value={action.id}>
+                            {action.title} {action.organizationName ? `• ${action.organizationName}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {actionId && actions.find((action) => action.id === actionId)?.title && (
+                        <small className="form-text text-muted">
+                          {actions.find((action) => action.id === actionId)?.title}
+                        </small>
+                      )}
                     </div>
 
                     <div className="mb-3">
@@ -174,7 +217,7 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                     <button
                       ref={btnRef}
                       onClick={() => void handleRegister()}
-                      disabled={isLoading || !actionId || !formVisible}
+                      disabled={isLoading || !actionId || !formVisible || actions.length === 0}
                       className={`btn btn-primary w-100${caretFired ? ' btn--fired' : ''}`}
                     >
                       {isLoading
@@ -222,18 +265,20 @@ export function ParticipatePage({ locale, userId, onSuccess }: ParticipatePagePr
                       <div className="loader-spinner" />
                       <span>{t.loading}</span>
                     </div>
-                  ) : participations.length === 0 ? (
+                  ) : displayParticipations.length === 0 ? (
                     <p className="no-participations">{t.noParticipations}</p>
                   ) : (
                     <div className="list-group">
-                      {participations.map((p, i) => (
+                      {displayParticipations.map((p, i) => (
                         <div
                           key={p.id}
                           className="participation-item"
                           style={{ animationDelay: `${i * 0.07}s` }}
                         >
                           <div className="participation-info">
-                            <span className="participation-action">{t.actionNumber}{p.actionId ?? p.charityActionId}</span>
+                            <span className="participation-action">
+                              {p.actionTitle || actions.find((action) => action.id === (p.actionId ?? p.charityActionId))?.title || `${t.actionNumber}${p.actionId ?? p.charityActionId}`}
+                            </span>
                             <span className={getRoleBadgeClass(p.roleInAction)}>{p.roleInAction}</span>
                           </div>
                           <small className="participation-date">{formatDate(p.createdAt)}</small>

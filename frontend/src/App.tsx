@@ -150,10 +150,10 @@ function defaultPageForUser(user: User | null): PageType {
   if (!user) {
     return 'auth'
   }
-  if (user.role === 'SUPER_ADMIN') {
-    return 'admin'
+  if (user.role === 'ORGANIZER') {
+    return 'org-dashboard'
   }
-  return user.role === 'ORGANIZER' ? 'org-dashboard' : 'dashboard'
+  return 'dashboard'
 }
 
 export function App() {
@@ -256,6 +256,12 @@ export function App() {
   }
 
   function handleAuthSuccess(user: User) {
+    if (user.role === 'SUPER_ADMIN') {
+      localStorage.setItem('user', JSON.stringify(user))
+      window.location.href = 'http://localhost:8080/admin'
+      return
+    }
+
     setState((prev) => ({
       ...prev,
       user,
@@ -280,10 +286,21 @@ export function App() {
   }
 
   function handleProfileUpdate(user: User) {
+    if (user.role === 'SUPER_ADMIN') {
+      localStorage.setItem('user', JSON.stringify(user))
+      setState((prev) => ({
+        ...prev,
+        user,
+        currentPage: 'admin',
+      }))
+      window.location.href = 'http://localhost:8080/admin'
+      return
+    }
+
     setState((prev) => ({
       ...prev,
       user,
-      currentPage: user.role === 'SUPER_ADMIN' ? 'admin' : prev.currentPage,
+      currentPage: prev.currentPage,
     }))
   }
 

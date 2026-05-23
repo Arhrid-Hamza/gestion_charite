@@ -109,6 +109,24 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
           throw new Error('Compte Google non resolu')
         }
 
+        if (found.role === 'SUPER_ADMIN') {
+          const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
+            .trim().replace(/\/api$/i, '')
+          const form = document.createElement('form')
+          form.method = 'POST'
+          form.action = `${backendBase}/admin/google-login`
+
+          const emailInput = document.createElement('input')
+          emailInput.type = 'hidden'
+          emailInput.name = 'email'
+          emailInput.value = found.email
+
+          form.appendChild(emailInput)
+          document.body.appendChild(form)
+          form.submit()
+          return
+        }
+
         setSuccess('Connexion Google reussie!')
         onAuthSuccess(found)
       } catch {
@@ -190,13 +208,37 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
     try {
       await call<{ userId: number }>(`/auth/login`, {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       })
 
       const users = await call<User[]>('/users')
       const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase())
 
       if (!found) throw new Error('Utilisateur introuvable')
+
+      if (found.role === 'SUPER_ADMIN') {
+        const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
+          .trim().replace(/\/api$/i, '')
+        const form = document.createElement('form')
+        form.method = 'POST'
+        form.action = `${backendBase}/admin/login`
+
+        const emailInput = document.createElement('input')
+        emailInput.type = 'hidden'
+        emailInput.name = 'email'
+        emailInput.value = email.trim()
+
+        const passwordInput = document.createElement('input')
+        passwordInput.type = 'hidden'
+        passwordInput.name = 'password'
+        passwordInput.value = password.trim()
+
+        form.appendChild(emailInput)
+        form.appendChild(passwordInput)
+        document.body.appendChild(form)
+        form.submit()
+        return
+      }
 
       setSuccess('Connexion réussie!')
       onAuthSuccess(found)
@@ -672,7 +714,7 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
       // backend: POST /api/organizations/login returns Organization (no wrapper)
       const org = await call<Organization>('/organizations/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       })
 
 

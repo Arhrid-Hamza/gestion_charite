@@ -303,8 +303,18 @@
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
+  color: #1f2937;
+  background-color: #ffffff;
   font-family: inherit;
   transition: border-color 0.3s;
+}
+
+.form-input::placeholder {
+  color: #6b7280;
+}
+
+.form-input option {
+  color: #1f2937;
 }
 
 .form-input:focus {

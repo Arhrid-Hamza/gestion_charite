@@ -83,6 +83,10 @@ public class PaymentController {
 							"custom_id", request.actionId() + ":" + request.donorUserId()
 					)),
 					"application_context", Map.of(
+							"brand_name", "Gestion Charité",
+							"landing_page", "BILLING",
+							"user_action", "PAY_NOW",
+							"shipping_preference", "NO_SHIPPING",
 							"return_url", frontendUrl + "?payment=paypal-success",
 							"cancel_url", frontendUrl + "?payment=paypal-cancel"
 					)

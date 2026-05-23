@@ -85,8 +85,8 @@ public class OrganizationController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-		String email = credentials.get("email");
-		String password = credentials.get("password");
+		String email = credentials.get("email") == null ? null : credentials.get("email").trim();
+		String password = credentials.get("password") == null ? null : credentials.get("password").trim();
 
 		if (email == null || email.isBlank() || password == null || password.isBlank()) {
 			return ResponseEntity.badRequest().body(Map.of("error", "Email et mot de passe requis"));
@@ -97,7 +97,7 @@ public class OrganizationController {
 		java.util.Optional<Organization> orgOpt = organizationRepository.findAll().stream()
 
 				// NOTE: matching is case-insensitive on email
-				.filter(org -> email.equalsIgnoreCase(org.getPrimaryContactEmail()))
+				.filter(org -> org.getPrimaryContactEmail() != null && email.equalsIgnoreCase(org.getPrimaryContactEmail().trim()))
 				.findFirst();
 
 		if (orgOpt.isEmpty()) {

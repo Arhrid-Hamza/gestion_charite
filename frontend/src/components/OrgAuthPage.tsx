@@ -20,19 +20,30 @@ export function OrgAuthPage({ locale, onOrgLogin }: OrgAuthPageProps) {
     e.preventDefault()
     setSuccess('')
     try {
-      const result = await call<{ organization: Organization; user: User }>(
+      const result = await call<Organization | { organization: Organization; user?: User }>(
         '/organizations/login',
         {
           method: 'POST',
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email: email.trim(), password: password.trim() }),
         },
       )
+      const organization = 'organization' in result ? result.organization : result
+      const user = 'organization' in result && result.user
+        ? result.user
+        : {
+            id: organization.adminUserId ?? organization.id,
+            fullName: organization.primaryContactName || organization.name,
+            email: organization.primaryContactEmail,
+            role: 'ORGANIZER' as const,
+            preferredLanguage: locale,
+            phone: organization.primaryContactPhone || '',
+          }
       setSuccess(
         locale === 'fr'
-          ? `Connecté en tant que ${result.organization.name}`
-          : `تم الدخول بصفة ${result.organization.name}`,
+          ? `Connecté en tant que ${organization.name}`
+          : `تم الدخول بصفة ${organization.name}`,
       )
-      onOrgLogin?.(result.organization, result.user)
+      onOrgLogin?.(organization, user)
     } catch { /* error already set */ }
   }
 

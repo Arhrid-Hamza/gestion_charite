@@ -25,6 +25,8 @@ public class Participation {
 
 	private Long actionId;
 
+	private String actionTitle;
+
 	private String roleInAction;
 
 	private LocalDateTime joinedAt;

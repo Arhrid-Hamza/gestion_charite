@@ -204,13 +204,15 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-		Optional<User> optionalUser = userRepository.findByEmail(request.email());
+		String email = request.email() == null ? null : request.email().trim();
+		String password = request.password() == null ? null : request.password().trim();
+		Optional<User> optionalUser = userRepository.findByEmail(email);
 		if (optionalUser.isEmpty()) {
 			return ResponseEntity.status(401).body(Map.of("error", "Identifiants invalides"));
 		}
 
 		User user = optionalUser.get();
-		String incomingPasswordHash = hashPassword(request.password());
+		String incomingPasswordHash = hashPassword(password);
 		if (!incomingPasswordHash.equals(user.getPasswordHash())) {
 			return ResponseEntity.status(401).body(Map.of("error", "Identifiants invalides"));
 		}

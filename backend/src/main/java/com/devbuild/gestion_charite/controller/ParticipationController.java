@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devbuild.gestion_charite.entity.Participation;
+import com.devbuild.gestion_charite.entity.CharityAction;
+import com.devbuild.gestion_charite.entity.User;
 import com.devbuild.gestion_charite.repository.CharityActionRepository;
 import com.devbuild.gestion_charite.repository.ParticipationRepository;
 import com.devbuild.gestion_charite.repository.UserRepository;
@@ -40,17 +42,17 @@ public class 	ParticipationController {
 
 	@GetMapping
 	public List<Participation> findAll() {
-		return participationRepository.findAll();
+		return participationRepository.findAll().stream().map(this::enrichParticipation).toList();
 	}
 
 	@GetMapping("/action/{actionId}")
 	public List<Participation> findByAction(@PathVariable Long actionId) {
-		return participationRepository.findByActionId(actionId);
+		return participationRepository.findByActionId(actionId).stream().map(this::enrichParticipation).toList();
 	}
 
 	@GetMapping("/user/{userId}")
 	public List<Participation> findByUser(@PathVariable Long userId) {
-		return participationRepository.findByParticipantUserId(userId);
+		return participationRepository.findByParticipantUserId(userId).stream().map(this::enrichParticipation).toList();
 	}
 
 	@PostMapping
@@ -70,6 +72,12 @@ public class 	ParticipationController {
 		if (participation.getParticipantName() == null || participation.getParticipantName().isBlank()) {
 			participation.setParticipantName(resolveDisplayName(user));
 		}
+		if (participation.getActionTitle() == null || participation.getActionTitle().isBlank()) {
+			CharityAction action = charityActionRepository.findById(participation.getActionId()).orElse(null);
+			if (action != null) {
+				participation.setActionTitle(resolveActionTitle(action));
+			}
+		}
 		if (participation.getJoinedAt() == null) {
 			participation.setJoinedAt(LocalDateTime.now());
 		}
@@ -84,5 +92,28 @@ public class 	ParticipationController {
 			return user.getFullName();
 		}
 		return user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : "—";
+	}
+
+	private String resolveActionTitle(CharityAction action) {
+		if (action.getTitle() != null && !action.getTitle().isBlank()) {
+			return action.getTitle();
+		}
+		return "Action #" + action.getId();
+	}
+
+	private Participation enrichParticipation(Participation participation) {
+		if (participation.getParticipantName() == null || participation.getParticipantName().isBlank()) {
+			if (participation.getParticipantUserId() != null) {
+				userRepository.findById(participation.getParticipantUserId())
+						.ifPresent(user -> participation.setParticipantName(resolveDisplayName(user)));
+			}
+		}
+		if (participation.getActionTitle() == null || participation.getActionTitle().isBlank()) {
+			if (participation.getActionId() != null) {
+				charityActionRepository.findById(participation.getActionId())
+						.ifPresent(action -> participation.setActionTitle(resolveActionTitle(action)));
+			}
+		}
+		return participation;
 	}
 }

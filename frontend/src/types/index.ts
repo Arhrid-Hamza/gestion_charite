@@ -73,6 +73,7 @@ export interface Participation {
   participantName?: string
   participantUserId: number
   actionId?: number
+  actionTitle?: string
   charityActionId?: number
   roleInAction: string
   joinedAt?: string
