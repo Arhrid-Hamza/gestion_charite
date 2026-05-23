@@ -62,6 +62,11 @@ export function Layout({
     onNavigate(page)
   }
 
+  function handleAdminDashboardClick() {
+    setMenuOpen(false)
+    window.location.href = 'http://localhost:8080/admin'
+  }
+
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -184,7 +189,15 @@ export function Layout({
                     <NavBtn page="participate"   label={t.participate}  icon={NAV_ICONS.participate} />
                     <NavBtn page="organization"  label={t.organization} icon={NAV_ICONS.organization} />
                     {user.role === 'SUPER_ADMIN' && (
-                      <NavBtn page="admin"  label={t.admin}   icon={NAV_ICONS.admin} />
+                      <li className="nav-item">
+                        <button
+                          className="nav-link nav-link-btn"
+                          onClick={handleAdminDashboardClick}
+                        >
+                          <i className={`ti ${NAV_ICONS.admin}`} aria-hidden="true" />
+                          {t.admin}
+                        </button>
+                      </li>
                     )}
                     <NavBtn page="profile" label={t.profile} icon={NAV_ICONS.profile} />
                   </>

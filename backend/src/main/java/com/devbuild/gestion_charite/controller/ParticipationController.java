@@ -58,7 +58,8 @@ public class 	ParticipationController {
 		if (participation.getParticipantUserId() == null || participation.getActionId() == null) {
 			return ResponseEntity.badRequest().body("participantUserId et actionId sont obligatoires");
 		}
-		if (!userRepository.existsById(participation.getParticipantUserId())) {
+		var user = userRepository.findById(participation.getParticipantUserId()).orElse(null);
+		if (user == null) {
 			return ResponseEntity.badRequest().body("Utilisateur introuvable");
 		}
 		if (!charityActionRepository.existsById(participation.getActionId())) {
@@ -66,6 +67,9 @@ public class 	ParticipationController {
 		}
 
 		participation.setId(mongoSequenceService.nextId("participations"));
+		if (participation.getParticipantName() == null || participation.getParticipantName().isBlank()) {
+			participation.setParticipantName(resolveDisplayName(user));
+		}
 		if (participation.getJoinedAt() == null) {
 			participation.setJoinedAt(LocalDateTime.now());
 		}
@@ -73,5 +77,12 @@ public class 	ParticipationController {
 			participation.setRoleInAction("VOLUNTEER");
 		}
 		return ResponseEntity.ok(participationRepository.save(participation));
+	}
+
+	private String resolveDisplayName(com.devbuild.gestion_charite.entity.User user) {
+		if (user.getFullName() != null && !user.getFullName().isBlank()) {
+			return user.getFullName();
+		}
+		return user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : "—";
 	}
 }

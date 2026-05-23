@@ -7,22 +7,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
+        body { font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; min-height: 100vh; color: #0f172a; }
 
-        .navbar-custom { background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 1rem 0; }
+        .navbar-custom { background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 50%, #07485a 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 1rem 0; }
         .brand-button { background: none; border: none; font-size: 1.4rem; font-weight: bold; color: #fff; cursor: pointer; text-decoration: none; }
 
         .page-wrapper { padding: 30px 0 60px; }
         .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
 
-        .back-btn { background: rgba(44,62,80,0.08); border: 1.5px solid #2c3e50; color: #2c3e50; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s; }
-        .back-btn:hover { background: #2c3e50; color: white; }
+        .back-btn { background: rgba(12,122,138,0.08); border: 1.5px solid #0c7a8a; color: #0c7a8a; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s; }
+        .back-btn:hover { background: #0c7a8a; color: white; }
 
-        .page-header h2 { font-size: 1.6rem; font-weight: 800; color: #2c3e50; margin: 0; }
+        .page-header h2 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; }
 
         .detail-card { background: white; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 24px; }
 
-        .card-hero { background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%); padding: 32px 28px; display: flex; align-items: center; gap: 24px; }
+        .card-hero { background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 100%); padding: 32px 28px; display: flex; align-items: center; gap: 24px; }
         .hero-avatar { width: 72px; height: 72px; border-radius: 14px; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
         .hero-info h3 { color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
         .hero-info .hero-sub { color: rgba(255,255,255,0.8); font-size: 0.88rem; }
@@ -41,7 +41,7 @@
         @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
 
         .info-field label { font-size: 0.78rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
-        .info-field .field-value { font-size: 0.95rem; color: #2c3e50; font-weight: 500; padding: 10px 14px; background: #f8f9fa; border-radius: 8px; border: 1.5px solid #e8ecf0; }
+        .info-field .field-value { width: 100%; font-size: 0.95rem; color: #2c3e50; font-weight: 500; padding: 10px 14px; background: #f8f9fa; border-radius: 8px; border: 1.5px solid #e8ecf0; }
 
         .actions-bar { display: flex; gap: 12px; padding: 20px 28px; border-top: 1px solid #f0f2f5; background: #fafbfc; flex-wrap: wrap; }
 
@@ -69,7 +69,7 @@
 
 <nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+        <a class="brand-button" href="/admin">🎗️ Gestion Charité</a>
     </div>
 </nav>
 
@@ -89,6 +89,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <form th:action="@{/admin/organizations/{id}/edit(id=${org.id})}" method="post">
     <!-- Main detail card -->
     <div class="detail-card">
         <div class="card-hero">
@@ -122,19 +123,24 @@
             <div class="info-grid">
                 <div class="info-field">
                     <label>Nom</label>
-                    <div class="field-value" th:text="${org.name}">—</div>
+                    <input class="field-value" type="text" name="name" th:value="${org.name}" required />
                 </div>
                 <div class="info-field">
                     <label>Statut</label>
-                    <div class="field-value" th:text="${org.status}">—</div>
+                    <select class="field-value" name="status" required>
+                        <option th:each="s : ${T(com.devbuild.gestion_charite.entity.enums.OrganizationStatus).values()}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${org.status == s}">PENDING</option>
+                    </select>
                 </div>
                 <div class="info-field">
                     <label>Adresse légale</label>
-                    <div class="field-value" th:text="${org.legalAddress != null ? org.legalAddress : '—'}">—</div>
+                    <input class="field-value" type="text" name="legalAddress" th:value="${org.legalAddress}" />
                 </div>
                 <div class="info-field">
                     <label>N° Fiscal</label>
-                    <div class="field-value" th:text="${org.taxIdentificationNumber != null ? org.taxIdentificationNumber : '—'}">—</div>
+                    <input class="field-value" type="text" name="taxIdentificationNumber" th:value="${org.taxIdentificationNumber}" />
                 </div>
             </div>
 
@@ -142,36 +148,52 @@
             <div class="info-grid">
                 <div class="info-field">
                     <label>Nom du contact</label>
-                    <div class="field-value" th:text="${org.primaryContactName != null ? org.primaryContactName : '—'}">—</div>
+                    <input class="field-value" type="text" name="primaryContactName" th:value="${org.primaryContactName}" />
                 </div>
                 <div class="info-field">
                     <label>Email</label>
-                    <div class="field-value" th:text="${org.primaryContactEmail != null ? org.primaryContactEmail : '—'}">—</div>
+                    <input class="field-value" type="email" name="primaryContactEmail" th:value="${org.primaryContactEmail}" />
                 </div>
                 <div class="info-field">
                     <label>Téléphone</label>
-                    <div class="field-value" th:text="${org.primaryContactPhone != null ? org.primaryContactPhone : '—'}">—</div>
+                    <input class="field-value" type="text" name="primaryContactPhone" th:value="${org.primaryContactPhone}" />
                 </div>
                 <div class="info-field">
                     <label>ID Organisation</label>
-                    <div class="field-value" th:text="${org.id}">—</div>
+                    <input class="field-value" type="text" th:value="${org.id}" readonly />
+                </div>
+            </div>
+
+            <div class="info-section-title mt-4">📝 Contenu public</div>
+            <div class="info-grid">
+                <div class="info-field">
+                    <label>Description</label>
+                    <input class="field-value" type="text" name="description" th:value="${org.description}" />
+                </div>
+                <div class="info-field">
+                    <label>Mission</label>
+                    <input class="field-value" type="text" name="mission" th:value="${org.mission}" />
+                </div>
+                <div class="info-field">
+                    <label>Logo</label>
+                    <input class="field-value" type="text" name="logoUrl" th:value="${org.logoUrl}" />
+                </div>
+                <div class="info-field">
+                    <label>Administrateur</label>
+                    <input class="field-value" type="text" th:value="${org.adminUserId}" readonly />
                 </div>
             </div>
         </div>
 
         <!-- Action buttons -->
         <div class="actions-bar">
-            <form th:if="${org.status.toString() == 'PENDING'}"
-                  th:action="@{/admin/{id}/approve(id=${org.id})}" method="post" style="margin:0;">
-                <button type="submit" class="btn-approve">✓ Approuver</button>
-            </form>
-            <form th:if="${org.status.toString() == 'APPROVED'}"
-                  th:action="@{/admin/organizations/{id}/reject(id=${org.id})}" method="post" style="margin:0;">
-                <button type="submit" class="btn-reject">✗ Rejeter</button>
-            </form>
+            <button type="submit" class="btn-approve">✓ Enregistrer</button>
+            <button type="submit" class="btn-approve" th:if="${org.status.toString() == 'PENDING'}" th:formaction="@{/admin/{id}/approve(id=${org.id})}">✓ Approuver</button>
+            <button type="submit" class="btn-reject" th:if="${org.status.toString() == 'APPROVED'}" th:formaction="@{/admin/organizations/{id}/reject(id=${org.id})}">✗ Rejeter</button>
             <a href="/admin/organizations" class="btn-back-link">← Retour</a>
         </div>
     </div>
+    </form>
 
     <!-- Actions table -->
     <div class="section-card">

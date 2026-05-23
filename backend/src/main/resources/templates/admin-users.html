@@ -9,13 +9,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
             min-height: 100vh;
+            color: #0f172a;
         }
 
         .navbar-custom {
-            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 50%, #07485a 100%);
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             padding: 1rem 0;
         }
@@ -44,7 +45,7 @@
         .page-header h2 {
             font-size: 1.9rem;
             font-weight: 800;
-            color: #2c3e50;
+            color: #0f172a;
             margin: 0;
         }
 
@@ -228,7 +229,7 @@
 <!-- ── Navigation ── -->
 <nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+        <a class="brand-button" href="/admin">🎗️ Gestion Charité</a>
     </div>
 </nav>
 
@@ -255,13 +256,14 @@
 
     <!-- Search / filter bar -->
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom ou email..."
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom, email, téléphone, adresse..."
                oninput="filterUsers()" />
         <select id="roleFilter" onchange="filterUsers()">
             <option value="">Tous les rôles</option>
             <option value="DONOR">Donor</option>
             <option value="ORGANIZATION">Organisation</option>
             <option value="ADMIN">Admin</option>
+            <option value="SUPER_ADMIN">Super-admin</option>
         </select>
     </div>
 
@@ -277,19 +279,24 @@
                 <thead>
                 <tr>
                     <th>Utilisateur</th>
+                    <th class="hide-mobile">Email</th>
                     <th class="hide-mobile">Téléphone</th>
+                    <th class="hide-mobile">Adresse</th>
                     <th>Rôle</th>
                     <th class="hide-mobile">Langue</th>
+                    <th class="hide-mobile">Organisation</th>
                     <th style="text-align:center;">Action</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="user, stat : ${users}"
-                    th:data-name="${#strings.toLowerCase(user.fullName)}"
-                    th:data-email="${#strings.toLowerCase(user.email)}"
-                    th:data-role="${user.role}"
-                    onclick="window.location.href=this.dataset.href"
-                    th:attr="data-href=@{/admin/users/{id}(id=${user.id})}">
+                    th:data-name="${#strings.toLowerCase(user.fullName != null ? user.fullName : '')}"
+                    th:data-email="${#strings.toLowerCase(user.email != null ? user.email : '')}"
+                    th:data-phone="${#strings.toLowerCase(user.phone != null ? user.phone : '')}"
+                    th:data-address="${#strings.toLowerCase(user.address != null ? user.address : '')}"
+                    th:data-org="${#strings.toLowerCase(user.joinedOrganizationName != null ? user.joinedOrganizationName : '')}"
+                    th:data-role="${user.role}">
+
 
                     <td>
                         <div class="user-name-cell">
@@ -299,11 +306,19 @@
                                                       stat.index % 5 == 1 ? 'av-teal' :
                                                       stat.index % 5 == 2 ? 'av-coral' :
                                                       stat.index % 5 == 3 ? 'av-purple' : 'av-amber'}"
-                                 th:text="${#strings.substring(user.fullName, 0, 1) +
-                                               (#strings.contains(user.fullName,' ') ?
-                                                #strings.substring(#strings.substringAfter(user.fullName,' '), 0, 1) : '')}">
+th:text="${(user.fullName != null and #strings.length(#strings.trim(user.fullName)) > 0) ?
+                                               (
+                                                 #strings.substring(#strings.trim(user.fullName), 0, 1) +
+                                                 (
+                                                   #strings.contains(#strings.trim(user.fullName),' ')
+                                                   ? #strings.substring(#strings.substringAfter(#strings.trim(user.fullName),' '), 0, 1)
+                                                   : ''
+                                                 )
+                                               )
+                                               : 'XX'}"
                                 XX
                             </div>
+
                             <div>
                                 <div class="user-name-text" th:text="${user.fullName}">Nom</div>
                                 <div class="user-email-text" th:text="${user.email}">email</div>
@@ -311,7 +326,11 @@
                         </div>
                     </td>
 
+                    <td class="hide-mobile" th:text="${user.email != null ? user.email : '—'}">—</td>
+
                     <td class="hide-mobile" th:text="${user.phone != null ? user.phone : '—'}">—</td>
+
+                    <td class="hide-mobile" th:text="${user.address != null ? user.address : '—'}">—</td>
 
                     <td>
                             <span class="role-badge"
@@ -320,6 +339,8 @@
                     </td>
 
                     <td class="hide-mobile" th:text="${user.preferredLanguage != null ? user.preferredLanguage : '—'}">fr</td>
+
+                    <td class="hide-mobile" th:text="${user.joinedOrganizationName != null ? user.joinedOrganizationName : '—'}">—</td>
 
                     <td style="text-align:center;" onclick="event.stopPropagation()">
                         <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn-view">
@@ -354,9 +375,12 @@
         rows.forEach(row => {
             const name   = row.dataset.name  || '';
             const email  = row.dataset.email || '';
+            const phone  = row.dataset.phone || '';
+            const address = row.dataset.address || '';
+            const org    = row.dataset.org || '';
             const rRole  = row.dataset.role  || '';
 
-            const matchSearch = name.includes(search) || email.includes(search);
+            const matchSearch = name.includes(search) || email.includes(search) || phone.includes(search) || address.includes(search) || org.includes(search);
             const matchRole   = !role || rRole === role;
 
             if (matchSearch && matchRole) {

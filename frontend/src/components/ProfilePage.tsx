@@ -62,8 +62,10 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
   useEffect(() => {
     if (!user?.id) return
 
+    let tid: ReturnType<typeof window.setTimeout> | undefined
+
     if (user.role === 'ORGANIZER') {
-      const tid = window.setTimeout(() => {
+      tid = window.setTimeout(() => {
         void call<Organization[]>('/organizations')
           .then((orgs) => {
             const linked =
@@ -105,27 +107,30 @@ export function ProfilePage({ locale, user, onUpdate }: ProfilePageProps) {
             setOrganizationProfile(null)
           })
       }, 0)
-      return () => window.clearTimeout(tid)
+    } else {
+      tid = window.setTimeout(() => {
+        void call<User>(`/users/${user.id}`)
+          .then((payload) => {
+            setProfileUser(payload)
+            setFullName(payload.fullName ?? '')
+            setPhone(payload.phone ?? '')
+            setAddress(payload.address ?? '')
+            setInterests(payload.interests ?? 'education,sante')
+            onUpdate?.(payload)
+          })
+          .catch(() => {
+            setProfileUser(user)
+            setFullName(user.fullName ?? '')
+            setPhone(user.phone ?? '')
+            setAddress(user.address ?? '')
+            setInterests(user.interests ?? 'education,sante')
+          })
+      }, 0)
     }
 
-    const tid = window.setTimeout(() => {
-      void call<User>(`/users/${user.id}`)
-        .then((payload) => {
-          setProfileUser(payload)
-          setFullName(payload.fullName ?? '')
-          setPhone(payload.phone ?? '')
-          setAddress(payload.address ?? '')
-          setInterests(payload.interests ?? 'education,sante')
-          onUpdate?.(payload)
-        })
-        .catch(() => {
-          setProfileUser(user)
-          setFullName(user.fullName ?? '')
-          setPhone(user.phone ?? '')
-          setAddress(user.address ?? '')
-          setInterests(user.interests ?? 'education,sante')
-        })
-    }, 0)
+    return () => {
+      if (tid !== undefined) window.clearTimeout(tid)
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [call, user?.id, user?.role, user?.email])

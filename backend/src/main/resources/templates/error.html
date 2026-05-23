@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${status} + ' – Gestion Charité'">Erreur – Gestion Charité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(12, 122, 138, 0.16), transparent 30%),
+                linear-gradient(135deg, #eef7f8 0%, #f6fbfd 45%, #eef4f8 100%);
+            color: #0f172a;
+        }
+
+        .error-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .error-card {
+            width: 100%;
+            max-width: 760px;
+            border: none;
+            border-radius: 24px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .error-header {
+            background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 50%, #07485a 100%);
+            color: white;
+            padding: 28px 32px;
+        }
+
+        .error-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .error-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.16);
+            display: grid;
+            place-items: center;
+            font-size: 1.5rem;
+        }
+
+        .error-brand h1 {
+            font-size: 1.55rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .error-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .error-body {
+            padding: 34px 32px 32px;
+        }
+
+        .error-kicker {
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: #0c7a8a;
+            font-weight: 700;
+            font-size: 0.78rem;
+            margin-bottom: 10px;
+        }
+
+        .error-title {
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 14px;
+            color: #0f172a;
+        }
+
+        .error-text {
+            font-size: 1.05rem;
+            color: #475569;
+            max-width: 56ch;
+            margin-bottom: 24px;
+        }
+
+        .error-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .meta-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px 16px;
+            background: #fff;
+        }
+
+        .meta-label {
+            display: block;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .meta-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-word;
+        }
+
+        .error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-primary-custom,
+        .btn-secondary-custom {
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-primary-custom {
+            color: #fff;
+            background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 100%);
+            box-shadow: 0 10px 24px rgba(12, 122, 138, 0.24);
+        }
+
+        .btn-secondary-custom {
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+        }
+
+        .btn-primary-custom:hover,
+        .btn-secondary-custom:hover {
+            transform: translateY(-1px);
+            color: inherit;
+        }
+
+        .error-footer {
+            padding: 0 32px 28px;
+            color: #64748b;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 576px) {
+            .error-header,
+            .error-body,
+            .error-footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="error-shell">
+    <section class="error-card">
+        <header class="error-header">
+            <div class="error-brand">
+                <div class="error-logo">🎗️</div>
+                <div>
+                    <h1>Gestion Charité</h1>
+                    <div>Interface d'administration et de suivi</div>
+                </div>
+            </div>
+            <div class="error-badge" th:text="${status} + ' • ' + ${error}">404 • Not Found</div>
+        </header>
+
+        <div class="error-body">
+            <div class="error-kicker" th:text="${status} == 404 ? 'Page introuvable' : 'Erreur serveur'">Page introuvable</div>
+            <h2 class="error-title"
+                th:text="${status} == 404 ? 'La page demandée est introuvable.' : 'Une erreur inattendue s\'est produite.'">
+                La page demandée est introuvable.
+            </h2>
+            <p class="error-text"
+               th:text="${status} == 404 ? 'Le lien est incorrect, a expiré, ou la ressource n\'existe pas encore.' : 'Le serveur a rencontré un problème au traitement de votre requête. Réessayez dans un instant.'">
+                Le lien est incorrect, a expiré, ou la ressource n'existe pas encore.
+            </p>
+
+            <div class="error-meta">
+                <div class="meta-card">
+                    <span class="meta-label">Statut</span>
+                    <div class="meta-value" th:text="${status}">404</div>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-label">Chemin</span>
+                    <div class="meta-value" th:text="${path} ?: '/'">/</div>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-label">Horodatage</span>
+                    <div class="meta-value" th:text="${timestamp}">2026-05-23T14:30:24</div>
+                </div>
+            </div>
+
+            <div class="error-actions">
+                <a class="btn-primary-custom" href="/admin">Aller au dashboard admin</a>
+                <a class="btn-secondary-custom" href="http://localhost:5173">Retour au site principal</a>
+            </div>
+        </div>
+
+        <div class="error-footer">
+            <span th:if="${message}" th:text="${message}">Erreur</span>
+            <span th:unless="${message}">Si le problème persiste, revenez sur le dashboard admin ou réessayez plus tard.</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

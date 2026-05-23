@@ -7,35 +7,31 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; min-height: 100vh; }
+    body { font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; min-height: 100vh; color: #0f172a; }
 
-    .navbar-custom { background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 1rem 0; }
+    .navbar-custom { background: linear-gradient(135deg, #0c7a8a 0%, #0a5f72 50%, #07485a 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 1rem 0; }
     .brand-button { background: none; border: none; font-size: 1.4rem; font-weight: bold; color: #fff; cursor: pointer; text-decoration: none; }
 
     .page-wrapper { padding: 30px 0 60px; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-    .page-header h2 { font-size: 1.9rem; font-weight: 800; color: #2c3e50; margin: 0; }
+    .page-header h2 { font-size: 1.9rem; font-weight: 800; color: #0f172a; margin: 0; }
 
-    .back-btn { background: rgba(44,62,80,0.08); border: 1.5px solid #2c3e50; color: #2c3e50; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s; }
-    .back-btn:hover { background: #2c3e50; color: white; }
+    .back-btn { background: rgba(12,122,138,0.08); border: 1.5px solid #0c7a8a; color: #0c7a8a; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s; }
+    .back-btn:hover { background: #0c7a8a; color: white; }
 
-    /* Summary cards */
     .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .sum-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); padding: 20px; display: flex; align-items: center; gap: 14px; }
     .sum-icon { font-size: 1.8rem; width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .sum-icon.green  { background: #e6f9f0; }
     .sum-icon.blue   { background: #e8f0fe; }
-    .sum-icon.purple { background: #f3e8ff; }
-    .sum-value { font-size: 1.5rem; font-weight: 800; color: #2c3e50; line-height: 1; }
+    .sum-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1; }
     .sum-label { font-size: 0.78rem; color: #7f8c8d; margin-top: 4px; }
 
-    /* Search bar */
     .search-bar { background: white; border-radius: 10px; padding: 14px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .search-bar input, .search-bar select { border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 14px; font-size: 0.9rem; outline: none; background: white; transition: border-color 0.2s; }
     .search-bar input { flex: 1; min-width: 200px; }
     .search-bar input:focus, .search-bar select:focus { border-color: #3498db; }
 
-    /* Table */
     .donations-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden; }
     .donations-table { width: 100%; border-collapse: collapse; }
     .donations-table thead { background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%); color: white; }
@@ -46,13 +42,16 @@
     .donations-table tbody td { padding: 13px 16px; font-size: 0.9rem; color: #444; vertical-align: middle; }
 
     .amount-badge { font-weight: 800; color: #27ae60; font-size: 1rem; }
-
-    /* Payment method badge */
     .pm-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.74rem; font-weight: 700; }
     .pm-PAYPAL  { background: #e8f0fe; color: #003087; }
     .pm-CARD    { background: #e6f9f0; color: #085041; }
     .pm-CASH    { background: #fff4e6; color: #7a4100; }
     .pm-TRANSFER { background: #f3e8ff; color: #5b21b6; }
+
+    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 700; }
+    .status-CONFIRMED { background: #e6f9f0; color: #085041; }
+    .status-PENDING   { background: #fff4e6; color: #7a4100; }
+    .status-FAILED    { background: #fde8e8; color: #7a1200; }
 
     .summary-bar { padding: 12px 16px; background: #f8f9fa; border-top: 1px solid #e9ecef; font-size: 0.84rem; color: #7f8c8d; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .empty-state { text-align: center; padding: 60px 20px; color: #7f8c8d; }
@@ -66,7 +65,7 @@
 
 <nav class="navbar navbar-custom navbar-expand-lg navbar-dark">
   <div class="container">
-    <a class="brand-button" href="/">🎗️ Gestion Charité</a>
+    <a class="brand-button" href="/admin">🎗️ Gestion Charité</a>
   </div>
 </nav>
 
@@ -79,40 +78,30 @@
     </div>
   </div>
 
-  <!-- Summary cards -->
   <div class="summary-cards">
-    <div class="sum-card">
-      <div class="sum-icon green">💳</div>
-      <div>
-        <div class="sum-value" th:text="${totalCount}">0</div>
-        <div class="sum-label">Total des dons</div>
-      </div>
-    </div>
     <div class="sum-card">
       <div class="sum-icon blue">💰</div>
       <div>
-        <div class="sum-value" th:text="${totalAmount} + ' MAD'">0 MAD</div>
-        <div class="sum-label">Montant total</div>
+        <div class="sum-value" th:text="${totalCount}">0</div>
+        <div class="sum-label">Dons au total</div>
       </div>
     </div>
     <div class="sum-card">
-      <div class="sum-icon purple">📊</div>
+      <div class="sum-icon green">💵</div>
       <div>
-        <div class="sum-value" th:text="${avgAmount} + ' MAD'">0 MAD</div>
-        <div class="sum-label">Don moyen</div>
+        <div class="sum-value" th:text="'$' + ${totalAmount}">$0.00</div>
+        <div class="sum-label">Montant collecté</div>
       </div>
     </div>
   </div>
 
-  <!-- Search -->
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 Rechercher par donateur ou note..." oninput="filterDonations()" />
-    <select id="pmFilter" onchange="filterDonations()">
-      <option value="">Tous les moyens</option>
-      <option value="PAYPAL">PayPal</option>
-      <option value="CARD">Carte</option>
-      <option value="CASH">Espèces</option>
-      <option value="TRANSFER">Virement</option>
+    <input type="text" id="searchInput" placeholder="🔍 Rechercher par donateur..." oninput="filterDonations()" />
+    <select id="statusFilter" onchange="filterDonations()">
+      <option value="">Tous les statuts</option>
+      <option value="CONFIRMED">✅ Confirmé</option>
+      <option value="PENDING">⏳ En attente</option>
+      <option value="FAILED">❌ Échoué</option>
     </select>
   </div>
 
@@ -126,59 +115,50 @@
       <table class="donations-table" id="donationsTable">
         <thead>
         <tr>
-          <th>Montant</th>
           <th>Donateur</th>
-          <th class="hide-mobile">Action #</th>
-          <th>Moyen</th>
-          <th class="hide-mobile">Note</th>
+          <th class="hide-mobile">Action</th>
+          <th>Montant</th>
+          <th class="hide-mobile">Méthode</th>
+          <th>Statut</th>
           <th class="hide-mobile">Date</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="don : ${donations}"
-            th:data-note="${#strings.toLowerCase(don.note != null ? don.note : '')}"
-            th:data-donor="${don.donorUserId != null ? don.donorUserId : ''}"
-            th:data-pm="${don.paymentMethod != null ? don.paymentMethod : ''}">
+        <tr th:each="donation : ${donations}"
+            th:data-donor="${#strings.toLowerCase(donation.donorEmail != null ? donation.donorEmail : '')}"
+            th:data-status="${donation.status}">
 
           <td>
-            <span class="amount-badge" th:text="${don.amount != null ? don.amount + ' MAD' : '—'}">—</span>
+            <div th:text="${donation.donorEmail != null ? donation.donorEmail : '—'}">email</div>
+            <div style="font-size:0.78rem; color:#7f8c8d;" th:text="${donation.donorName != null ? donation.donorName : ''}"></div>
           </td>
 
+          <td class="hide-mobile" th:text="${donation.actionId != null ? 'Action #' + donation.actionId : '—'}">—</td>
+
           <td>
-            <a th:if="${don.donorUserId != null}"
-               th:href="@{/admin/users/{id}(id=${don.donorUserId})}"
-               style="color:#3498db; font-weight:600; text-decoration:none;"
-               th:text="'Utilisateur #' + ${don.donorUserId}">—</a>
-            <span th:if="${don.donorUserId == null}" style="color:#aaa;">Anonyme</span>
+            <span class="amount-badge" th:text="'$' + ${#numbers.formatDecimal(donation.amount != null ? donation.amount : 0, 1, 2)}">$0.00</span>
           </td>
 
           <td class="hide-mobile">
-            <span th:text="${don.actionId != null ? '#' + don.actionId : '—'}">—</span>
+            <span class="pm-badge" th:classappend="${'pm-' + (donation.paymentMethod != null ? donation.paymentMethod : 'CARD')}" th:text="${donation.paymentMethod != null ? donation.paymentMethod : 'CARD'}">CARD</span>
           </td>
 
           <td>
-                        <span th:if="${don.paymentMethod != null}"
-                              class="pm-badge"
-                              th:classappend="${'pm-' + don.paymentMethod}"
-                              th:text="${don.paymentMethod}">—</span>
-            <span th:if="${don.paymentMethod == null}" style="color:#aaa;">—</span>
+            <span class="status-badge" th:classappend="${'status-' + (donation.status != null ? donation.status : 'PENDING')}" th:text="${donation.status != null ? donation.status : 'PENDING'}">PENDING</span>
           </td>
 
-          <td class="hide-mobile"
-              th:text="${don.note != null and !don.note.isEmpty() ? #strings.abbreviate(don.note, 40) : '—'}">—</td>
-
-          <td class="hide-mobile"
-              th:text="${don.createdAt != null ? #temporals.format(don.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+          <td class="hide-mobile" th:text="${donation.createdAt != null ? #temporals.format(donation.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
         </tr>
         </tbody>
       </table>
 
       <div class="summary-bar">
-        <span><span id="visibleCount" th:text="${donations.size()}">0</span> don(s) affiché(s)</span>
-        <span>Total visible : <strong id="visibleTotal">calcul...</strong></span>
+        <span id="visibleCount" th:text="${donations.size()}">0</span> don(s) affichée(s)
+        <span th:text="'Total: $' + ${totalAmount}">Total: $0.00</span>
       </div>
     </div>
   </div>
+
 </div>
 
 <div style="text-align:center;color:#aaa;padding:20px;font-size:0.85rem;">
@@ -187,41 +167,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Extract amounts from DOM for visible total
   function filterDonations() {
     const search = document.getElementById('searchInput').value.toLowerCase();
-    const pm     = document.getElementById('pmFilter').value;
-    const rows   = document.querySelectorAll('#donationsTable tbody tr');
-    let visible  = 0;
-    let total    = 0;
-
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('#donationsTable tbody tr');
+    let visible = 0;
     rows.forEach(row => {
-      const note  = row.dataset.note  || '';
       const donor = row.dataset.donor || '';
-      const rPm   = row.dataset.pm    || '';
-      const matchSearch = note.includes(search) || donor.includes(search);
-      const matchPm     = !pm || rPm === pm;
-
-      if (matchSearch && matchPm) {
-        row.style.display = '';
-        visible++;
-        // parse amount from first cell
-        const amtText = row.querySelector('td:first-child .amount-badge')?.textContent || '0';
-        const amt = parseFloat(amtText.replace(' MAD','').replace(',','.')) || 0;
-        total += amt;
-      } else {
-        row.style.display = 'none';
-      }
+      const rStatus = row.dataset.status || '';
+      const matchSearch = donor.includes(search);
+      const matchStatus = !status || rStatus === status;
+      if (matchSearch && matchStatus) { row.style.display = ''; visible++; }
+      else { row.style.display = 'none'; }
     });
-
-    const counter = document.getElementById('visibleCount');
-    if (counter) counter.textContent = visible;
-    const totalEl = document.getElementById('visibleTotal');
-    if (totalEl) totalEl.textContent = total.toFixed(2) + ' MAD';
-  }
-
-  // Init total on load
-  window.addEventListener('DOMContentLoaded', () => filterDonations());
+    document.getElementById('visibleCount').textContent = visible;
 </script>
 </body>
 </html>
+

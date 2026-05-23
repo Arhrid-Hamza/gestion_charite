@@ -150,6 +150,9 @@ function defaultPageForUser(user: User | null): PageType {
   if (!user) {
     return 'auth'
   }
+  if (user.role === 'SUPER_ADMIN') {
+    return 'admin'
+  }
   return user.role === 'ORGANIZER' ? 'org-dashboard' : 'dashboard'
 }
 
@@ -256,7 +259,7 @@ export function App() {
     setState((prev) => ({
       ...prev,
       user,
-      currentPage: 'dashboard',
+      currentPage: defaultPageForUser(user),
     }))
   }
 
@@ -277,7 +280,11 @@ export function App() {
   }
 
   function handleProfileUpdate(user: User) {
-    setState((prev) => ({ ...prev, user }))
+    setState((prev) => ({
+      ...prev,
+      user,
+      currentPage: user.role === 'SUPER_ADMIN' ? 'admin' : prev.currentPage,
+    }))
   }
 
   function handleActionSelect(action: CharityAction) {

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 
 function normalizeApiBaseUrl(rawValue: string | undefined) {
-  const base = (rawValue ?? 'http://localhost:8081/api').trim().replace(/\/+$/, '')
+  const base = (rawValue ?? 'http://localhost:8080/api').trim().replace(/\/+$/, '')
   return /\/api$/i.test(base) ? base : `${base}/api`
 }
 

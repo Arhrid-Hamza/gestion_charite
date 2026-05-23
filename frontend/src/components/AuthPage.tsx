@@ -9,7 +9,7 @@ import { Alert } from './Header'
 import '../styles/AuthPage.css'
 
 function normalizeApiBaseUrl(rawValue: string | undefined) {
-  const base = (rawValue ?? 'http://localhost:8081/api').trim().replace(/\/+$/, '')
+  const base = (rawValue ?? 'http://localhost:8080/api').trim().replace(/\/+$/, '')
   return /\/api$/i.test(base) ? base : `${base}/api`
 }
 
@@ -164,8 +164,8 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
 
     // Admin → POST direct vers backend Spring Boot (port 8080)
     if (email.toLowerCase() === 'admin@gestion-charite.local') {
-      const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api')
-          .trim().replace(/\/api$/i, '').replace('8080', '8081')
+      const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
+        .trim().replace(/\/api$/i, '')
       const form = document.createElement('form')
       form.method = 'POST'
       form.action = `${backendBase}/admin/login`
