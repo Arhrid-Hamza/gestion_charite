@@ -1,90 +1,198 @@
 # Gestion Charite
 
-Gestion Charite is a full-stack charity management platform for discovering charity actions, creating organizations, donating, and managing participation from a single web app.
+Gestion Charite is a full-stack charity platform to manage organizations, charity actions, donations, and participation in one application.
 
-The project is split into a Spring Boot backend and a React + TypeScript frontend, with MongoDB persistence and Docker support for local development.
+The repository contains:
+- A Spring Boot backend (REST API + admin templates)
+- A React + TypeScript frontend (Vite)
+- MongoDB persistence
+- Docker setup for local development
 
-## What The App Does
+## Latest Changes (May 2026)
 
-- Lets users sign in and manage their profile
-- Shows charity actions and organization listings
-- Supports donations with PayPal and Stripe flows
-- Lets users participate in actions and track their history
-- Provides organization dashboards for organizer accounts
-- Includes an admin area for platform management
-- Handles Google OAuth configuration on the backend
+### Functional Updates
+- Organization Dashboard now loads fresh data before editing organization details.
+- Charity Action edit form now preloads existing values immediately, then hydrates with latest API data.
+- Dashboard refresh logic now fetches organization details endpoint (`/organizations/{id}`) after identifying linked org.
+- Action category prefill supports both `categoryName` and `category` payload variants.
+
+### UI/UX Updates
+- Fixed unreadable white text in dashboard form fields by enforcing readable input text color and background.
+- Improved placeholder and select option contrast in organization dashboard forms.
+
+## Core Features
+
+- User authentication and profile management
+- Organization creation and organizer dashboard
+- Charity action creation, editing, archiving, and tracking
+- Donation flows with Stripe and PayPal
+- Participation workflows and participation history
+- Admin interface for organization/action governance
+- Google OAuth support on backend
 
 ## Tech Stack
 
-- Backend: Spring Boot 3.5.11, Spring Web, Spring Data MongoDB, Thymeleaf server-side templates, Mail
+- Backend: Spring Boot 3.5.x, Spring Web, Spring Data MongoDB, Thymeleaf
 - Frontend: React 19, TypeScript, Vite, Bootstrap
 - Database: MongoDB
-- Integration: REST API under `/api`
+- API base path: `/api`
 
-## Repository Layout
+## Repository Structure
 
-- `backend/` Spring Boot API and Thymeleaf server-side templates
-- `frontend/` React client application
-- `docker-compose.yml` Local Docker setup for MongoDB, backend, and frontend
-- `data/` Seed data used by the backend
+- `backend/` Java backend API and admin templates
+- `frontend/` React application
+- `data/` Seed JSON files
+- `docker-compose.yml` Local containers (MongoDB, backend, frontend)
+- `Dockerfile.backend` Backend image definition
+- `Dockerfile.frontend` Frontend image definition
+- `nginx.conf` Frontend serving/proxy configuration
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+		U[User Browser] --> F[Frontend React App\nVite Build]
+		F -->|REST /api| B[Spring Boot Backend]
+		B --> M[(MongoDB)]
+
+		B --> P1[Stripe API]
+		B --> P2[PayPal API]
+		B --> G[Google OAuth]
+
+		subgraph Repo
+			FE[frontend/]
+			BE[backend/]
+			DATA[data/]
+		end
+
+		FE -.build/deploy.- F
+		BE -.runs.- B
+		DATA -.seed.- M
+```
+
+## Frontend Navigation Diagram
+
+```mermaid
+flowchart TD
+		A[Auth/Login] --> E[Explore]
+		A --> P[Profile]
+		A --> O[Organization Page]
+
+		E --> D[Donate]
+		E --> PA[Participate]
+		E --> OD[Organization Action Details]
+
+		O --> ODASH[Organization Dashboard]
+		ODASH --> OEDIT[Edit Organization]
+		ODASH --> AEDIT[Create/Edit Action]
+		ODASH --> AARCH[Archive Action]
+
+		A --> ADM[Admin Dashboard]
+```
+
+## Organization Dashboard Edit Data Flow
+
+```mermaid
+sequenceDiagram
+		participant User
+		participant UI as React OrganizationDashboard
+		participant API as Spring API
+
+		User->>UI: Open Organization Dashboard
+		UI->>API: GET /organizations
+		API-->>UI: Linked organization list item
+		UI->>API: GET /organizations/{id}
+		API-->>UI: Full organization details
+		UI->>API: GET /charity-actions?organizationId={id}
+		API-->>UI: Organization actions
+
+		User->>UI: Click Edit on organization
+		UI->>UI: Prefill form from current state (instant)
+		UI->>API: GET /organizations/{id}
+		API-->>UI: Latest organization payload
+		UI->>UI: Hydrate form with latest values
+
+		User->>UI: Click Edit on action
+		UI->>UI: Prefill action form from card data (instant)
+		UI->>API: GET /charity-actions/{id}
+		API-->>UI: Latest action payload
+		UI->>UI: Hydrate form fields
+```
+
+## Donation and Payment Flow
+
+```mermaid
+sequenceDiagram
+		participant User
+		participant FE as Frontend
+		participant BE as Backend
+		participant Stripe as Stripe/PayPal
+
+		User->>FE: Submit donation form
+		FE->>BE: POST /donations
+		BE-->>FE: Donation created (PENDING/CONFIRMED)
+
+		alt Stripe flow
+			FE->>BE: Payment init endpoint
+			BE->>Stripe: Create/confirm payment
+			Stripe-->>BE: Payment result
+		else PayPal flow
+			FE->>Stripe: Redirect/approval flow
+			Stripe-->>FE: Return callback
+			FE->>BE: Finalize payment confirmation
+		end
+
+		BE-->>FE: Final status update
+```
 
 ## Prerequisites
 
-- Java 17 or higher
-- Node.js 20 or higher
-- npm 10 or higher
-- Docker Desktop if you want to use the compose setup
+- Java 17+
+- Node.js 20+
+- npm 10+
+- Docker Desktop (optional, for compose workflow)
 
 ## Environment Variables
 
-### Frontend
+### Frontend (`frontend/.env`)
 
-Create a `.env` file in `frontend/` if you want to override the defaults from `frontend/.env.example`.
-
-- `VITE_API_URL` API base URL used by the React app
-- `VITE_PAYPAL_CLIENT_ID` PayPal client id for donation flow
-- `VITE_STRIPE_PUBLISHABLE_KEY` Stripe publishable key for donation flow
-
-The example file currently points `VITE_API_URL` to `http://localhost:8081/api`, so adjust it to match your backend port if needed.
+- `VITE_API_URL` API base URL (example: `http://localhost:8080/api`)
+- `VITE_PAYPAL_CLIENT_ID` PayPal client id
+- `VITE_STRIPE_PUBLISHABLE_KEY` Stripe publishable key
 
 ### Backend
 
-The backend reads these environment variables for Google OAuth and frontend redirects:
-
+- `SPRING_DATA_MONGODB_URI`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
-- `GOOGLE_REDIRECT_URI` default: `http://localhost:8080/api/auth/google/callback`
-- `APP_FRONTEND_URL` default: `http://localhost:5173`
-- `SPRING_DATA_MONGODB_URI` used by Docker and local overrides
+- `GOOGLE_REDIRECT_URI` (default `http://localhost:8080/api/auth/google/callback`)
+- `APP_FRONTEND_URL` (default `http://localhost:5173`)
 
 ## Run Locally
 
 ### Option 1: Docker Compose
 
-From the repository root:
+From repository root:
 
 ```powershell
 docker compose up --build
 ```
 
-This starts:
-
+Expected services:
 - MongoDB on `27017`
 - Backend on `8080`
-- Frontend on `3000`
+- Frontend on `3000` (containerized)
 
-### Option 2: Run Backend And Frontend Separately
+### Option 2: Run Services Separately
 
-Start MongoDB first, then run the backend:
+Start backend:
 
 ```powershell
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-Backend defaults to `http://localhost:8080`.
-
-Then start the frontend:
+Start frontend:
 
 ```powershell
 cd frontend
@@ -92,22 +200,22 @@ npm install
 npm run dev
 ```
 
-Frontend defaults to `http://localhost:5173`.
+Frontend dev server default: `http://localhost:5173`
 
 ## Main API Areas
 
-The backend exposes REST endpoints under `http://localhost:8080/api` for:
+Base URL: `http://localhost:8080/api`
 
-- `auth` Google authentication and session checks
-- `users` user profile and donation history
-- `organizations` organization listing and creation
-- `charity-actions` charity action management
-- `donations` donation creation and lookup
-- `participations` event participation management
-- `payments` PayPal and Stripe confirmation flows
-- `admin` admin-oriented data and maintenance operations
+- `/auth` authentication and OAuth callbacks
+- `/users` users and user profile data
+- `/organizations` create/list/update organizations
+- `/charity-actions` manage charity actions
+- `/donations` donation records
+- `/participations` participation records
+- `/payments` payment confirmation/finalization
+- `/admin` admin operations
 
-## Build And Test
+## Build and Verification
 
 ### Frontend
 
@@ -126,10 +234,10 @@ cd backend
 
 ## Notes
 
-- The backend seeds default data on startup when the database is empty.
-- MongoDB data persists locally through the `mongo-data` volume when using Docker Compose.
-- The frontend includes a global payment finalizer that handles PayPal and Stripe redirects back into the app.
+- Backend seeds initial data when the database is empty.
+- Docker Compose persists MongoDB data with a named volume.
+- Frontend has a payment finalization path for Stripe/PayPal redirects.
 
 ## License
 
-This project does not currently include an explicit license file.
+No explicit license file is included yet.
