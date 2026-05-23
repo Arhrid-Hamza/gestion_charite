@@ -64,7 +64,11 @@ export function Layout({
 
   function handleAdminDashboardClick() {
     setMenuOpen(false)
-    window.location.href = 'http://localhost:8080/admin'
+    const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)
+    const backendBase = apiUrl
+      ? apiUrl.trim().replace(/\/+$/, '').replace(/\/api$/i, '')
+      : 'http://localhost:8080'
+    window.location.href = `${backendBase}/admin`
   }
 
   // Close menu when clicking outside

@@ -255,10 +255,16 @@ export function App() {
     })
   }
 
+  function getBackendBaseUrl(): string {
+    const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)
+    if (!apiUrl) return 'http://localhost:8080'
+    return apiUrl.trim().replace(/\/+$/, '').replace(/\/api$/i, '')
+  }
+
   function handleAuthSuccess(user: User) {
     if (user.role === 'SUPER_ADMIN') {
       localStorage.setItem('user', JSON.stringify(user))
-      window.location.href = 'http://localhost:8080/admin'
+      window.location.href = `${getBackendBaseUrl()}/admin`
       return
     }
 
@@ -293,7 +299,7 @@ export function App() {
         user,
         currentPage: 'admin',
       }))
-      window.location.href = 'http://localhost:8080/admin'
+      window.location.href = `${getBackendBaseUrl()}/admin`
       return
     }
 
