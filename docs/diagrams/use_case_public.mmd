@@ -1,0 +1,92 @@
+%%{init: { 'theme': 'base', 'themeVariables': { 'actorBackground':'#f3f4f6' }}}%%
+flowchart LR
+  subgraph Actors
+    direction TB
+    V([Visitor])
+    U([Donor / User])
+    O([Organizer])
+    SA([Super-admin])
+    AP([Auth Provider])
+    PG([Payment Gateway])
+  end
+
+  subgraph UseCases
+    direction TB
+    BA((Browse Actions))
+    VAD((View Action Details))
+    SU((Sign Up))
+    SI((Sign In))
+    AUTH((Authenticate))
+    D((Donate))
+    P((Participate))
+    VP((View Profile))
+    CO((Create Organization))
+    EO((Edit Organization))
+    CA((Create Action))
+    EA((Edit Action))
+    AA((Archive Action))
+    CP((Create Payment))
+    CPG((Confirm Payment))
+    AM((Attach Media))
+    UAS((Update Action Status))
+    OAD((Open Admin Dashboard))
+    AO((Approve Organizations))
+    MU((Manage Users))
+    MD((Manage Donations))
+    MA((Manage Actions))
+    RP((Review Participations))
+    MPM((Review Platform Metrics))
+    RPO((Review Pending Organization))
+    EUR((Edit User Role))
+    IAD((Inspect Action Detail))
+  end
+
+  V --> BA
+  V --> VAD
+  V --> SU
+  V --> SI
+  U --> D
+  U --> P
+  U --> VP
+  O --> CO
+  O --> EO
+  O --> CA
+  O --> EA
+  O --> AA
+
+  SA --> OAD
+  SA --> AO
+  SA --> MU
+  SA --> MD
+  SA --> MA
+  SA --> RP
+  SA --> MPM
+
+  SU -.->|<<include>>| AUTH
+  SI -.->|<<include>>| AUTH
+  D -.->|<<include>>| AUTH
+  P -.->|<<include>>| AUTH
+  VP -.->|<<include>>| AUTH
+  CO -.->|<<include>>| AUTH
+  EO -.->|<<include>>| AUTH
+  CA -.->|<<include>>| AUTH
+  EA -.->|<<include>>| AUTH
+  AA -.->|<<include>>| AUTH
+
+  D -.->|<<include>>| CP
+  CP --> CPG
+  CA -.->|<<include>>| AM
+  EA -.->|<<include>>| UAS
+  OAD -.->|<<include>>| AUTH
+  AO -.->|<<include>>| AUTH
+  MU -.->|<<include>>| AUTH
+  MD -.->|<<include>>| AUTH
+  MA -.->|<<include>>| AUTH
+  RP -.->|<<include>>| AUTH
+  MPM -.->|<<include>>| AUTH
+  AO -.->|<<include>>| RPO
+  MU -.->|<<include>>| EUR
+  MA -.->|<<include>>| IAD
+
+  AP --> AUTH
+  PG --> CP

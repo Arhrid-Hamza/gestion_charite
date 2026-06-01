@@ -11,6 +11,28 @@ classDiagram
     +updateProfile(updated: User): User
   }
 
+  class Admin {
+    +Long id
+    +String fullName
+    +String email
+    +String role
+    +String adminLoggedIn
+    +String adminUserEmail
+    +login(email: String, password: String)
+    +googleLogin(email: String)
+    +logout()
+    +viewDashboard()
+    +viewOrganizations(status: String)
+    +viewOrganizationDetail(orgId: Long)
+    +manageUsers()
+    +manageDonations()
+    +manageActions()
+    +reviewParticipations()
+    +reviewPlatformMetrics()
+    +approveOrganization(orgId: Long)
+    +seedDonations(organizationId: Long)
+  }
+
   class Organization {
     +Long id
     +String name
@@ -69,7 +91,12 @@ classDiagram
   }
 
   %% Relationships
+  Admin ..> User : maps to role SUPER_ADMIN
   User --> Organization : joinedOrganizationId
+  Admin --> Organization : adminUserId / approval
+  Admin ..> CharityAction : reads and seeds donations
+  Admin ..> Donation : aggregates and reviews
+  Admin ..> Participation : reviews
   Organization "1" o-- "*" CharityAction : provides
   CharityAction "1" o-- "*" Donation : receives
   CharityAction "1" o-- "*" Participation : has
