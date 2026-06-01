@@ -4,40 +4,99 @@ This file contains detailed UML diagrams (Mermaid) representing Use Cases, Class
 
 ---
 
-## 1) Use Case Diagram
+## 1) Use Case Diagram - Public, Organizer and Admin
 
 ```mermaid
 %%{init: { 'theme': 'base', 'themeVariables': { 'actorBackground':'#f3f4f6' }}}%%
-usecaseDiagram
-  actor User as U
-  actor Organizer as O
-  actor Admin as A
-  rectangle Frontend {
-    U -- (Browse Actions)
-    U -- (View Action Details)
-    U -- (Donate)
-    U -- (Participate)
-    U -- (Sign Up / Sign In)
+flowchart LR
+  subgraph Actors
+    direction TB
+    V([Visitor])
+    U([Donor / User])
+    O([Organizer])
+    SA([Super-admin])
+    AP([Auth Provider])
+    PG([Payment Gateway])
+  end
 
-    O -- (Create Organization)
-    O -- (Manage Organization) <<include>> (Edit Organization)
-    O -- (Manage Actions) <<include>> (Create/Edit Action)
+  subgraph UseCases
+    direction TB
+    BA((Browse Actions))
+    VAD((View Action Details))
+    SU((Sign Up))
+    SI((Sign In))
+    AUTH((Authenticate))
+    D((Donate))
+    P((Participate))
+    VP((View Profile))
+    CO((Create Organization))
+    EO((Edit Organization))
+    CA((Create Action))
+    EA((Edit Action))
+    AA((Archive Action))
+    CP((Create Payment))
+    CPG((Confirm Payment))
+    OAD((Open Admin Dashboard))
+    AO((Approve Organizations))
+    MU((Manage Users))
+    MD((Manage Donations))
+    MA((Manage Actions))
+    RP((Review Participations))
+    MPM((Review Platform Metrics))
+    RPO((Review Pending Organization))
+    EUR((Edit User Role))
+    IAD((Inspect Action Detail))
+  end
 
-    A -- (Approve Organizations)
-    A -- (Manage Platform)
-  }
+  V --> BA
+  V --> VAD
+  V --> SU
+  V --> SI
+  U --> D
+  U --> P
+  U --> VP
+  O --> CO
+  O --> EO
+  O --> CA
+  O --> EA
+  O --> AA
 
-  (Donate) ..> (Create Payment) : <<include>>
-  (Create Payment) ..> (Confirm Payment) : <<extend>>
+  SA --> OAD
+  SA --> AO
+  SA --> MU
+  SA --> MD
+  SA --> MA
+  SA --> RP
+  SA --> MPM
 
-  note right of (Manage Actions)
-    Manage Actions includes: Create Action, Edit Action, Archive Action, View Metrics
-  end note
+  SU -.->|<<include>>| AUTH
+  SI -.->|<<include>>| AUTH
+  D -.->|<<include>>| AUTH
+  P -.->|<<include>>| AUTH
+  VP -.->|<<include>>| AUTH
+  CO -.->|<<include>>| AUTH
+  EO -.->|<<include>>| AUTH
+  CA -.->|<<include>>| AUTH
+  EA -.->|<<include>>| AUTH
+  AA -.->|<<include>>| AUTH
 
-  note left of (Sign Up / Sign In)
-    Supports: Local login, Google OAuth
-  end note
+  D -.->|<<include>>| CP
+  CP --> CPG
+  OAD -.->|<<include>>| AUTH
+  AO -.->|<<include>>| AUTH
+  MU -.->|<<include>>| AUTH
+  MD -.->|<<include>>| AUTH
+  MA -.->|<<include>>| AUTH
+  RP -.->|<<include>>| AUTH
+  MPM -.->|<<include>>| AUTH
+  AO -.->|<<include>>| RPO
+  MU -.->|<<include>>| EUR
+  MA -.->|<<include>>| IAD
+  AP --> AUTH
+  PG --> CP
 ```
+
+---
 
 ---
 
@@ -55,6 +114,28 @@ classDiagram
     +Long joinedOrganizationId
     +joinOrganization(orgId: Long): User
     +updateProfile(updated: User): User
+  }
+
+  class Admin {
+    +Long id
+    +String fullName
+    +String email
+    +String role
+    +String adminLoggedIn
+    +String adminUserEmail
+    +login(email: String, password: String)
+    +googleLogin(email: String)
+    +logout()
+    +viewDashboard()
+    +viewOrganizations(status: String)
+    +viewOrganizationDetail(orgId: Long)
+    +manageUsers()
+    +manageDonations()
+    +manageActions()
+    +reviewParticipations()
+    +reviewPlatformMetrics()
+    +approveOrganization(orgId: Long)
+    +seedDonations(organizationId: Long)
   }
 
   class Organization {
@@ -115,25 +196,23 @@ classDiagram
   }
 
   %% Relationships
+  Admin ..> User : maps to role SUPER_ADMIN
   User --> Organization : joinedOrganizationId
+  Admin --> Organization : adminUserId / approval
+  Admin ..> CharityAction : reads and seeds donations
+  Admin ..> Donation : aggregates and reviews
+  Admin ..> Participation : reviews
   Organization "1" o-- "*" CharityAction : provides
   CharityAction "1" o-- "*" Donation : receives
   CharityAction "1" o-- "*" Participation : has
   User "1" o-- "*" Donation : gives
   User "1" o-- "*" Participation : participates
 
-  %% Repositories/Services (not full classes, documented as notes)
-  note for CharityAction "CharityActionController: create, update, findAll, findById, archive"
-  end note
-
-  note for Organization "OrganizationController: findAll, findById, create, update, approve"
-  end note
-
 ```
 
 ---
 
-## 3) Activity Diagram: Organization Edit Flow (including include/extend details)
+## 4) Activity Diagram: Organization Edit Flow (including include/extend details)
 
 ```mermaid
 flowchart TD
@@ -166,7 +245,7 @@ flowchart TD
 
 ---
 
-## 4) Sequence Diagram: Donation (Stripe) flow (detailed)
+## 5) Sequence Diagram: Donation (Stripe) flow (detailed)
 
 ```mermaid
 sequenceDiagram
@@ -195,7 +274,7 @@ sequenceDiagram
 
 ---
 
-## 5) Sequence Diagram: Organization Dashboard Edit (detailed)
+## 6) Sequence Diagram: Organization Dashboard Edit (detailed)
 
 ```mermaid
 sequenceDiagram

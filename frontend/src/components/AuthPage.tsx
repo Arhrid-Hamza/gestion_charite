@@ -6,14 +6,8 @@ import { useApi } from '../hooks/useApi'
 import { I18N } from '../types/i18n'
 import type { Locale, User, Organization } from '../types'
 import { Alert } from './Header'
+import { API_BASE_URL, getBackendOrigin } from '../utils/backendUrl'
 import '../styles/AuthPage.css'
-
-function normalizeApiBaseUrl(rawValue: string | undefined) {
-  const base = (rawValue ?? 'http://localhost:8080/api').trim().replace(/\/+$/, '')
-  return /\/api$/i.test(base) ? base : `${base}/api`
-}
-
-const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL)
 
 function mapGoogleErrorToMessage(errorCode: string) {
   switch (errorCode) {
@@ -110,8 +104,7 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
         }
 
         if (found.role === 'SUPER_ADMIN') {
-          const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
-            .trim().replace(/\/api$/i, '')
+          const backendBase = getBackendOrigin()
           const form = document.createElement('form')
           form.method = 'POST'
           form.action = `${backendBase}/admin/google-login`
@@ -182,8 +175,7 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
 
     // Admin → POST direct vers backend Spring Boot (port 8080)
     if (email.toLowerCase() === 'admin@gestion-charite.local') {
-      const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
-        .trim().replace(/\/api$/i, '')
+      const backendBase = getBackendOrigin()
       const form = document.createElement('form')
       form.method = 'POST'
       form.action = `${backendBase}/admin/login`
@@ -217,8 +209,7 @@ export function AuthPage({ locale, onAuthSuccess, onOrgAuthSuccess }: AuthPagePr
       if (!found) throw new Error('Utilisateur introuvable')
 
       if (found.role === 'SUPER_ADMIN') {
-        const backendBase = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api')
-          .trim().replace(/\/api$/i, '')
+        const backendBase = getBackendOrigin()
         const form = document.createElement('form')
         form.method = 'POST'
         form.action = `${backendBase}/admin/login`

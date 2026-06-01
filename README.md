@@ -168,6 +168,28 @@ sequenceDiagram
 - `GOOGLE_REDIRECT_URI` (default `http://localhost:8080/api/auth/google/callback`)
 - `APP_FRONTEND_URL` (default `http://localhost:5173`)
 
+## Deployment
+
+### Frontend on Vercel
+
+Set the Vercel project root to `frontend/` and add these environment variables:
+
+- `VITE_API_URL` set to your Railway backend URL, for example `https://<your-railway-backend-domain>/api`
+- `VITE_PAYPAL_CLIENT_ID` if you use PayPal in production
+- `VITE_STRIPE_PUBLISHABLE_KEY` if you use Stripe in production
+
+The frontend includes a `vercel.json` rewrite so direct navigation to client routes keeps working after refresh.
+
+### Backend on Railway
+
+Configure Railway with the backend Dockerfile and set the backend environment variables there:
+
+- `SPRING_DATA_MONGODB_URI`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI` pointing to the Railway backend callback URL
+- `APP_FRONTEND_URL` pointing to the Vercel frontend URL
+
 ## Run Locally
 
 ### Option 1: Docker Compose

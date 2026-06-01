@@ -6,6 +6,7 @@ COPY backend/pom.xml .
 COPY backend/.mvn .mvn
 COPY backend/mvnw .
 COPY backend/mvnw.cmd .
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
 
 # Copy source

@@ -14,6 +14,7 @@ import { OrganizationDashboard } from './components/OrganizationDashboard'
 import { OrganizationActionDetailsPage } from './components/OrganizationActionDetailsPage'
 import { AdminPage } from './components/AdminPage'
 import { useApi } from './hooks/useApi'
+import { getBackendOrigin } from './utils/backendUrl'
 import './App.css'
 
 type PageType = 'auth' | 'dashboard' | 'explore' | 'donate' | 'profile' | 'participate' | 'organization' | 'admin' | 'org-dashboard' | 'org-action-details'
@@ -258,7 +259,7 @@ export function App() {
   function handleAuthSuccess(user: User) {
     if (user.role === 'SUPER_ADMIN') {
       localStorage.setItem('user', JSON.stringify(user))
-      window.location.href = 'http://localhost:8080/admin'
+      window.location.href = `${getBackendOrigin()}/admin`
       return
     }
 
@@ -293,7 +294,7 @@ export function App() {
         user,
         currentPage: 'admin',
       }))
-      window.location.href = 'http://localhost:8080/admin'
+      window.location.href = `${getBackendOrigin()}/admin`
       return
     }
 

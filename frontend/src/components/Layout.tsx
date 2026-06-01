@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Locale, User } from '../types'
 import { I18N } from '../types/i18n'
+import { getBackendOrigin } from '../utils/backendUrl'
 import '../styles/Layout.css'
 
 interface LayoutProps {
@@ -64,7 +65,7 @@ export function Layout({
 
   function handleAdminDashboardClick() {
     setMenuOpen(false)
-    window.location.href = 'http://localhost:8080/admin'
+    window.location.href = `${getBackendOrigin()}/admin`
   }
 
   // Close menu when clicking outside
