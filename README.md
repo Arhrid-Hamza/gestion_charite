@@ -47,6 +47,19 @@ The repository contains:
 - `Dockerfile.frontend` Frontend image definition
 - `nginx.conf` Frontend serving/proxy configuration
 
+## Project Management Dossier (Soutenance)
+
+To justify the full development approach during soutenance, use these project-management artifacts:
+
+- `docs/GESTION_PROJET.md` lifecycle, planning, milestones, risks, and presentation script
+- `docs/ENTREPRENEURIAT_PFA.md` structured entrepreneurship guide and checklist (market, feasibility, finance, legal)
+- `TODO.md` operational tracking and correction plan
+- `UML.md` use cases, class model, activity and sequence diagrams
+- `docs/diagrams/*.mmd` source Mermaid diagrams used in documentation
+- `docs/diagrams/pm_*.mmd` project-management diagrams (lifecycle, gantt, WBS, risk plan, governance)
+- `docs/diagrams/pm_*.pdf|svg` exported visuals ready for report and presentation
+- `rapport.tex` final report integrating project management and technical modules
+
 ## Architecture Diagram
 
 ```mermaid
